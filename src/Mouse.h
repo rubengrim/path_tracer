@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
-#include "GLFW/glfw3.h"
+
+struct GLFWwindow;
 
 typedef enum class MouseButton;
 

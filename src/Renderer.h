@@ -8,10 +8,30 @@
 
 #include <stdint.h>
 
+struct Payload
+{
+	int ObjectIndex;
+	float HitDistance;
+	Eigen::Vector3f Position;
+	Eigen::Vector3f Normal;
+	Color Color;
+};
+
 class Renderer
 {
 public:
-	static bool Render(Image* image, Scene* scene, Camera* camera, float& timeToRender);
-	static Color TraceRay(Ray ray, Scene* scene);
-	static uint32_t FloatToRGBA(Eigen::Vector4f floatColor);
+	bool Render(Image& image, Scene& scene, const Camera& camera, float& timeToRender);
+
+private:
+
+	Color PerPixel(int x, int y);
+	void RenderBlock(int yBegin, int yEnd);
+	Color TracePath(Ray ray);
+	Payload CastRay(Ray ray);
+	Payload HitShader(Ray ray, float hitDistance, int objectIndex);
+
+private:
+	Scene* m_Scene = nullptr;
+	const Camera* m_Camera = nullptr;
+	uint32_t* m_ImageData = nullptr;
 };

@@ -1,5 +1,6 @@
 #include "Mouse.h"
-#include "Window.h"
+
+#include "GLFW/glfw3.h"
 
 GLFWwindow* Mouse::m_Window = nullptr;
 

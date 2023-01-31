@@ -10,6 +10,33 @@ Color::Color(float r, float g, float b)
 {
 }
 
+float* Color::GetData3()
+{
+	float data[3] = { R, G, B };
+	return data;
+}
+
+float* Color::GetData4()
+{
+	float data[4] = { R, G, B, A };
+	return data;
+}
+
+void Color::SetData3(float data[3])
+{
+	R = data[0];
+	G = data[1];
+	B = data[2];
+}
+
+void Color::SetData4(float data[4])
+{
+	R = data[0];
+	G = data[1];
+	B = data[2];
+	A = data[3];
+}
+
 uint32_t Color::RGBA()
 {
 	Clamp();
@@ -18,10 +45,10 @@ uint32_t Color::RGBA()
 
 uint32_t Color::CalculateRGBA()
 {
-	uint8_t r = (uint8_t)(this->R * 255.0f);
-	uint8_t g = (uint8_t)(this->G * 255.0f);
-	uint8_t b = (uint8_t)(this->B * 255.0f);
-	uint8_t a = (uint8_t)(this->A * 255.0f);
+	uint8_t r = (uint8_t)(R * 255.0f);
+	uint8_t g = (uint8_t)(G * 255.0f);
+	uint8_t b = (uint8_t)(B * 255.0f);
+	uint8_t a = (uint8_t)(A * 255.0f);
 
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
@@ -33,71 +60,70 @@ void Color::Clamp()
 
 void Color::Clamp(float min, float max)
 {
-	this->R = (this->R > min) ? this->R : min;
-	this->R = (this->R < max) ? this->R : max;
+	R = (R > min) ? R : min;
+	R = (R < max) ? R : max;
 
-	this->G = (this->G > min) ? this->G : min;
-	this->G = (this->G < max) ? this->G : max;
+	G = (G > min) ? G : min;
+	G = (G < max) ? G : max;
 
-	this->B = (this->B > min) ? this->B : min;
-	this->B = (this->B < max) ? this->B : max;
+	B = (B > min) ? B : min;
+	B = (B < max) ? B : max;
 
-	this->A = (this->A > min) ? this->A : min;
-	this->A = (this->A < max) ? this->A : max;
+	A = (A > min) ? A : min;
+	A = (A < max) ? A : max;
 }
 
 Color Color::operator+(const Color& other) const
 {
 	Color ret;
-	ret.R = this->R + other.R;
-	ret.G = this->G + other.G;
-	ret.B = this->B + other.B;
-	ret.A = this->A + other.A;
+	ret.R = R + other.R;
+	ret.G = G + other.G;
+	ret.B = B + other.B;
+	ret.A = A;
 	return ret;
 }
 
 Color Color::operator-(const Color& other) const
 {
 	Color ret;
-	ret.R = this->R - other.R;
-	ret.G = this->G - other.G;
-	ret.B = this->B - other.B;
-	ret.A = this->A - other.A;
+	ret.R = R - other.R;
+	ret.G = G - other.G;
+	ret.B = B - other.B;
+	ret.A = A;
 	return ret;
 }
 
 Color Color::operator*(const float& factor) const
 {
 	Color ret;
-	ret.R = this->R * factor;
-	ret.G = this->G * factor;
-	ret.B = this->B * factor;
+	ret.R = R * factor;
+	ret.G = G * factor;
+	ret.B = B * factor;
+	ret.A = A;
 	return ret;
 }
 
 Color& Color::operator+=(const Color& other)
 {
-	this->R += other.R;
-	this->G += other.G;
-	this->B += other.B;
-	this->A += other.A;
+	R += other.R;
+	G += other.G;
+	B += other.B;
 	return *this;
 }
 
 Color& Color::operator-=(const Color& other)
 {
-	this->R -= other.R;
-	this->G -= other.G;
-	this->B -= other.B;
-	this->A -= other.A;
+	R -= other.R;
+	G -= other.G;
+	B -= other.B;
 	return *this;
 }
 
 Color& Color::operator*=(const float& factor)
 {
-	this->R *= factor;
-	this->G *= factor;
-	this->B *= factor;
+	R *= factor;
+	G *= factor;
+	B *= factor;
 	return *this;
 }
 

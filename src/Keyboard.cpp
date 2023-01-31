@@ -1,5 +1,7 @@
 #include "Keyboard.h"
 
+#include "GLFW/glfw3.h"
+
 GLFWwindow* Keyboard::m_Window = nullptr;
 
 std::array<bool, Keyboard::m_KeyCount> Keyboard::m_KeysPressed;

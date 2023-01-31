@@ -1,13 +1,13 @@
 #pragma once
 #include "Logger.h"
-#include "Window.h"
 #include "Image.h"
 #include "Camera.h"
 #include "Scene.h" 
+#include "Renderer.h"
 
 #include <chrono>
 
-typedef unsigned int GLuint;
+struct GLFWwindow;
 
 class Application
 {
@@ -19,20 +19,24 @@ public:
 	void Run();
 	void Shutdown();
 
-	bool InitializeImGui();
-
 private:
+	struct Settings
+	{
+		float MovementSpeed;
+		float MouseSensitivity;
+	};
+
+	void DrawSettingsWindow(Settings& settings);
+
+	GLFWwindow* m_WindowHandle;
+
 	Logger m_Logger;
-	Window m_Window;
-	
 	Camera* m_Camera = nullptr;
 	Image* m_Image = nullptr;
+	Renderer* m_Renderer = nullptr;
 
 	int m_ViewportWidth = 0;
 	int m_ViewportHeight = 0;
 
 	bool m_IsRunning = false;
-
-	std::chrono::time_point<std::chrono::steady_clock> m_BeginFrame;
-	std::chrono::time_point<std::chrono::steady_clock> m_EndFrame;
 };

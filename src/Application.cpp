@@ -1,16 +1,16 @@
 #include "Application.h"
 
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_glfw.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
-#include "glad/gl.h"
-#include "GLFW/glfw3.h"
-#include "Eigen/Core"
-
-#include "Renderer.h"
 #include "Mouse.h"
 #include "Keyboard.h"
 #include "Color.h"
+
+#include "glad/gl.h"
+#include "GLFW/glfw3.h"
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
+
+#include "Eigen/Core"
 
 #include <iostream>
 #include <chrono>
@@ -22,153 +22,46 @@ Application::~Application()
 	Shutdown();
 }
 
+void ErrorCallback(int error, const char* description)
+{
+	PULSE_ERROR("GLFW error: {}", description)
+}
+
 bool Application::Initialize()
 {
-	bool ret = true;
+	bool succeeded = true;
 
 	if (!m_Logger.Initialize())
 	{
-		ret = false;
+		succeeded = false;
 	}
 
-	if (!m_Window.Create(800, 600))
+	if (!glfwInit())
 	{
-		return false; // If the window creation fails we return immediately and don't run the app
+		PULSE_ERROR("Error during initialization of GLFW.")
+		succeeded = false;
 	}
 
-	Mouse::Initialize(m_Window.GetGLFWWindowHandle());
-	Keyboard::Initialize(m_Window.GetGLFWWindowHandle());
+	// BEGIN: Initialize GLFW
+	glfwSetErrorCallback(ErrorCallback);
 
-	InitializeImGui();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-	return ret;
-}
-
-void Application::Run()
-{
-	// TODO: Abstract colors into class
-
-	m_IsRunning = true;
-	PULSE_TRACE("Pulse is initialized and running.");
-
-	m_ViewportWidth = 400;
-	m_ViewportHeight = 200;
-	float timeToRender = 0.0f;
-
-	m_Camera = new Camera(Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, -1.0f), m_ViewportWidth, m_ViewportHeight);
-	m_Image = new Image(m_ViewportWidth, m_ViewportHeight);
-
-	float mouseSensitivity = 0.07f;
-	float movementSpeed = 1.0f;
-
-	m_BeginFrame = std::chrono::high_resolution_clock::now();
-	m_EndFrame = std::chrono::high_resolution_clock::now();
-		
-	// Set up scene
-	Sphere sphere1(Eigen::Vector3f(-1.0f, 0.0f, -4.0f), 0.5f, Color::Red());
-	Sphere sphere2(Eigen::Vector3f(1.0f, 0.0f, -4.0f), 0.3f, Color::Green());
-	Scene activeScene;
-	activeScene.AddSpheres({sphere1, sphere2});
-
-#define RUN 1
-#if RUN
-	// Main loop
-	while (m_IsRunning)
+	m_WindowHandle = glfwCreateWindow(800, 600, "My Title", NULL, NULL);
+	if (m_WindowHandle == nullptr)
 	{
-		m_EndFrame = std::chrono::high_resolution_clock::now();
-		float timeStep = std::chrono::duration_cast<std::chrono::microseconds>(m_EndFrame - m_BeginFrame).count() * 0.000001f;
-		m_BeginFrame = std::chrono::high_resolution_clock::now();
-
-		m_Window.Update();
-
-		// Update mouse and keyboard
-		Mouse::Update();
-		Keyboard::Update();
-
-		m_Image->Resize(m_ViewportWidth, m_ViewportHeight);
-		m_Camera->Resize(m_ViewportWidth, m_ViewportHeight);
-		m_Camera->Update(timeStep);
-
-		Renderer::Render(m_Image, &activeScene, m_Camera, timeToRender);
-			
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-		ImGui::DockSpaceOverViewport();
-
-		{
-			ImGui::Begin("Info");
-
-			//if (ImGui::Button("Render"))
-			//	Renderer::Render(m_Image, &activeScene, m_Camera, timeToRender);
-
-			ImGui::Text("CAMERA");
-			ImGui::Text("Pitch: %.2f", m_Camera->GetPitch());
-			ImGui::Text("Yaw: %.2f", m_Camera->GetYaw());
-			ImGui::Text("Position: %.2f, %.2f, %.2f", m_Camera->GetPosition().x(), m_Camera->GetPosition().y(), m_Camera->GetPosition().z());
-			ImGui::Text("Forward: %.2f, %.2f, %.2f", m_Camera->GetForwardDirection().x(), m_Camera->GetForwardDirection().y(), m_Camera->GetForwardDirection().z());
-
-			ImGui::SliderFloat("Sensitivity", &mouseSensitivity, 0.0f, 0.5f);
-			ImGui::SliderFloat("Speed", &movementSpeed, 0.0f, 4.0f);
-			m_Camera->SetMouseSensitivity(mouseSensitivity);
-			m_Camera->SetMovementSpeed(movementSpeed);
-
-			if (ImGui::Button("Reset Camera"))
-				m_Camera->ResetForwardAndPosition();
-				
-			ImGui::NewLine();
-			ImGui::Text("Last frame total: %.2f ms", timeStep * 1000.0f);
-			ImGui::Text("Rendering: %.2f ms", timeToRender);
-			ImGui::End();
-		}
-
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-			ImGui::Begin("Viewport");
-
-			m_ViewportWidth = ImGui::GetContentRegionAvail().x;
-			m_ViewportHeight = ImGui::GetContentRegionAvail().y;
-
-			if (m_Image)
-				ImGui::Image((void*)(intptr_t)(m_Image->GetTextureId()), ImVec2(m_Image->GetWidth(), m_Image->GetHeight()));
-				
-			ImGui::End();
-			ImGui::PopStyleVar();
-		}
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		// Update and Render additional Platform Windows
-		// (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-		// For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			GLFWwindow* backup_current_context = glfwGetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
-		}
-
-		m_IsRunning = !m_Window.GetWindowCloseFlag();
-
-		// Clamp framerate
-		// std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::milliseconds(50));
+		PULSE_ERROR("Error during GLFW window creation.")
+		succeeded = false;
 	}
-#endif
-}
 
-bool Application::InitializeImGui()
-{
-	bool ret = true;
+	glfwMakeContextCurrent(m_WindowHandle);
+	gladLoadGL(glfwGetProcAddress);
 
-	//if (!m_Window)
-	//{
-	//	PULSE_ERROR("Attempting to initialize ImGui before the window is created.")
-	//	ret = false;
-	//}
+	glfwSwapInterval(0);
+	// END: Initialize GLFW
 
-	// Setup Dear ImGui context
+	// BEGIN: Initialize IMGUI
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -189,16 +82,173 @@ bool Application::InitializeImGui()
 	}
 
 	// Setup Platform/Renderer backends
-	ImGui_ImplGlfw_InitForOpenGL(m_Window.GetGLFWWindowHandle(), true);
+	ImGui_ImplGlfw_InitForOpenGL(m_WindowHandle, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+	// END: Initialize IMGUI
 
-	return ret;
+	Mouse::Initialize(m_WindowHandle);
+	Keyboard::Initialize(m_WindowHandle);
+
+	return succeeded;
+}
+
+void Application::Run()
+{
+	m_IsRunning = true;
+	PULSE_TRACE("Pulse is initialized and running.");
+
+	m_ViewportWidth = 400;
+	m_ViewportHeight = 200;
+	float timeToRender = 0.0f;
+
+	m_Camera = new Camera(Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, -1.0f), m_ViewportWidth, m_ViewportHeight);
+	m_Image = new Image(m_ViewportWidth, m_ViewportHeight);
+	m_Renderer = new Renderer();
+
+	// Set up scene
+	Sphere sphere1(Eigen::Vector3f(-0.7f, 0.0f, -4.0f), 0.5f, Color::Red());
+	Sphere sphere2(Eigen::Vector3f(0.7f, 0.0f, -4.0f), 0.3f, Color::Green());
+	Scene activeScene;
+	activeScene.AddSpheres({sphere1, sphere2});
+
+	Settings settings;
+	settings.MouseSensitivity = 0.07f;
+	settings.MovementSpeed = 1.0f;
+
+	auto beginFrame = std::chrono::high_resolution_clock::now();
+	auto endFrame = std::chrono::high_resolution_clock::now();
+
+#define RUN 1
+#if RUN
+
+	// Main loop
+	while (m_IsRunning)
+	{
+		float timeStep = std::chrono::duration_cast<std::chrono::microseconds>(endFrame - beginFrame).count() * 0.000001f;
+		beginFrame = std::chrono::high_resolution_clock::now();
+
+		glfwSwapBuffers(m_WindowHandle);
+		glfwPollEvents();
+
+		Mouse::Update();
+		Keyboard::Update();
+
+		m_Image->Resize(m_ViewportWidth, m_ViewportHeight);
+		m_Camera->Resize(m_ViewportWidth, m_ViewportHeight);
+		m_Camera->Update(timeStep);
+
+		m_Renderer->Render(*m_Image, activeScene, *m_Camera, timeToRender);
+		
+		// BEGIN: Render GUI
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::DockSpaceOverViewport();
+
+		// Viewport
+		{ 
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::Begin("Viewport");
+
+			m_ViewportWidth = ImGui::GetContentRegionAvail().x;
+			m_ViewportHeight = ImGui::GetContentRegionAvail().y;
+
+			if (m_Image)
+				ImGui::Image((void*)(intptr_t)(m_Image->GetTextureId()), ImVec2(m_Image->GetWidth(), m_Image->GetHeight()));
+				
+			ImGui::End();
+			ImGui::PopStyleVar();
+		}
+
+		// Info window
+		{
+			ImGui::Begin("Info");
+			ImGui::Text("Camera Position: %.2f, %.2f, %.2f", m_Camera->GetPosition().x(), m_Camera->GetPosition().y(), m_Camera->GetPosition().z());
+			ImGui::Text("Camera Direction: %.2f, %.2f, %.2f", m_Camera->GetForwardDirection().x(), m_Camera->GetForwardDirection().y(), m_Camera->GetForwardDirection().z());
+			ImGui::NewLine();
+			ImGui::Text("Last frame total: %.2f ms", timeStep * 1000.0f);
+			ImGui::Text("Rendering: %.2f ms", timeToRender);
+			ImGui::End();
+		}
+
+		// Settings window
+		{
+			ImGui::Begin("Settings");
+
+			ImGui::Text("CAMERA");
+			if (ImGui::Button("Reset Camera"))
+				m_Camera->ResetForwardAndPosition();
+			ImGui::DragFloat("Sensitivity", &settings.MouseSensitivity, 0.002f, 0.0f, 2.0f);
+			ImGui::DragFloat("Speed", &settings.MovementSpeed, 0.01f, 0.0f, 10.0f);
+			m_Camera->SetMouseSensitivity(settings.MouseSensitivity);
+			m_Camera->SetMovementSpeed(settings.MovementSpeed);
+
+
+			ImGui::NewLine();
+
+			ImGui::Text("SCENE");
+
+			if (ImGui::Button("Add Sphere"))
+			{
+				Sphere newSphere(Eigen::Vector3f::Zero(), 0.5f, Color::LightGrey());
+				activeScene.Spheres().push_back(newSphere);
+			}
+
+			ImGui::NewLine();
+
+			std::vector<int> spheresToBeDeleted;
+			for (int i = 0; i < activeScene.Spheres().size(); i++)
+			{
+				ImGui::PushID(i);
+
+				Sphere& sphere = activeScene.Spheres()[i];
+				ImGui::DragFloat3("Position", sphere.Center.data(), 0.01f);
+				ImGui::DragFloat("Radius", &sphere.Radius, 0.01f);
+				Eigen::Vector3f albedo(sphere.Albedo.R, sphere.Albedo.G, sphere.Albedo.B);
+				ImGui::ColorEdit3("Albedo", albedo.data());
+				sphere.Albedo = Color(albedo.x(), albedo.y(), albedo.z());
+
+				if (ImGui::Button("Delete"))
+					spheresToBeDeleted.push_back(i);
+
+				ImGui::PopID();
+				ImGui::NewLine();
+			}
+
+			for (int i : spheresToBeDeleted)
+				activeScene.DeleteSphere(i);
+
+			ImGui::End();
+		}
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Update and Render additional Platform Windows
+		// (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+		// For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
+		// END: Render GUI
+
+		m_IsRunning = !glfwWindowShouldClose(m_WindowHandle);
+		endFrame = std::chrono::high_resolution_clock::now();
+	}
+
+#endif
 }
 
 void Application::Shutdown()
 {
 	m_Logger.Shutdown();
-	m_Window.Shutdown();
+
+	glfwDestroyWindow(m_WindowHandle);
+	glfwTerminate();
 
 	ImGui::DestroyContext();
 }
