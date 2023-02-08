@@ -63,13 +63,13 @@
     <ClInclude Include="src\Logger.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\MathUtils.h">
+    <ClInclude Include="src\Utils.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Mouse.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Primitives.h">
+    <ClInclude Include="src\Objects.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Ray.h">
@@ -84,6 +84,10 @@
     <ClInclude Include="src\Window.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\BSDF.h" />
+    <ClInclude Include="src\Material.h" />
+    <ClInclude Include="src\Random.h" />
+    <ClInclude Include="src\HitContext.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\imgui\imgui\backends\imgui_impl_glfw.cpp">
@@ -140,5 +144,8 @@
     <ClCompile Include="src\Window.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utils.cpp" />
+    <ClCompile Include="src\BSDF.cpp" />
+    <ClCompile Include="src\Random.cpp" />
   </ItemGroup>
 </Project>

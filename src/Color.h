@@ -1,6 +1,6 @@
 #pragma once
 #include "Eigen/Dense"
-#include "MathUtils.h"
+#include "Utils.h"
 
 #include <stdint.h>
 
@@ -19,7 +19,10 @@ public:
 	Color() = default;
 	Color(float r, float g, float b);
 	Color(float r, float g, float b, float a);
+	Color(Eigen::Vector3f vec3);
 	
+	Eigen::Vector3f ToVec3();
+
 	float* GetData3();
 	float* GetData4();
 	void SetData3(float data[3]);
@@ -32,11 +35,13 @@ public:
 
 	Color operator+(const Color& other) const;
 	Color operator-(const Color& other) const;
-	Color operator*(const float& other) const;
+	Color operator*(const Color& other) const;
+	Color operator*(const float& factor) const;
 
 	Color& operator+=(const Color& other);
 	Color& operator-=(const Color& other);
-	Color& operator*=(const float& other);
+	Color& operator*=(const Color& other);
+	Color& operator*=(const float& factor);
 
 	float R;
 	float G;

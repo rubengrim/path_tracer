@@ -3,6 +3,7 @@
 #include "Mouse.h"
 #include "Keyboard.h"
 #include "Color.h"
+#include "Random.h"
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -89,6 +90,8 @@ bool Application::Initialize()
 	Mouse::Initialize(m_WindowHandle);
 	Keyboard::Initialize(m_WindowHandle);
 
+	Random::Initialize();
+
 	return succeeded;
 }
 
@@ -103,13 +106,20 @@ void Application::Run()
 
 	m_Camera = new Camera(Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, -1.0f), m_ViewportWidth, m_ViewportHeight);
 	m_Image = new Image(m_ViewportWidth, m_ViewportHeight);
-	m_Renderer = new Renderer();
+	m_Renderer = new Renderer(m_ViewportWidth, m_ViewportHeight);
 
 	// Set up scene
-	Sphere sphere1(Eigen::Vector3f(-0.7f, 0.0f, -4.0f), 0.5f, Color::Red());
-	Sphere sphere2(Eigen::Vector3f(0.7f, 0.0f, -4.0f), 0.3f, Color::Green());
 	Scene activeScene;
-	activeScene.AddSpheres({sphere1, sphere2});
+
+	Material defaultGrey(Color::DarkGrey());
+	Material red(Color::Red());
+	Material green(Color::Green());
+	activeScene.AddMaterials({defaultGrey, red, green});
+
+	Sphere sphere1(Eigen::Vector3f(0.0f, 0.0f, -4.0f), 0.5f, 1);
+	//Sphere sphere2(Eigen::Vector3f(0.7f, 0.0f, -4.0f), 0.3f, 2);
+	Sphere sphere3(Eigen::Vector3f(0.0f, -50.5f, -4.0f), 50.0f, 0);
+	activeScene.AddSpheres({sphere1, sphere3});
 
 	Settings settings;
 	settings.MouseSensitivity = 0.07f;
@@ -133,10 +143,10 @@ void Application::Run()
 		Mouse::Update();
 		Keyboard::Update();
 
-		m_Image->Resize(m_ViewportWidth, m_ViewportHeight);
-		m_Camera->Resize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera->Update(timeStep);
 
+		if (m_Camera->HasMoved())
+			m_Renderer->ResetAccumulation();
 		m_Renderer->Render(*m_Image, activeScene, *m_Camera, timeToRender);
 		
 		// BEGIN: Render GUI
@@ -150,8 +160,16 @@ void Application::Run()
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 			ImGui::Begin("Viewport");
 
+			int prevViewportWidth = m_ViewportWidth;
+			int prevViewportHeight = m_ViewportHeight;
 			m_ViewportWidth = ImGui::GetContentRegionAvail().x;
 			m_ViewportHeight = ImGui::GetContentRegionAvail().y;
+			if (prevViewportWidth != m_ViewportWidth || prevViewportHeight != m_ViewportHeight)
+			{
+				m_Image->Resize(m_ViewportWidth, m_ViewportHeight);
+				m_Camera->Resize(m_ViewportWidth, m_ViewportHeight);
+				m_Renderer->Resize(m_ViewportWidth, m_ViewportHeight);
+			}
 
 			if (m_Image)
 				ImGui::Image((void*)(intptr_t)(m_Image->GetTextureId()), ImVec2(m_Image->GetWidth(), m_Image->GetHeight()));
@@ -176,13 +194,10 @@ void Application::Run()
 			ImGui::Begin("Settings");
 
 			ImGui::Text("CAMERA");
+			ImGui::DragFloat("Sensitivity", &m_Camera->MouseSensitivity(), 0.002f, 0.0f, 2.0f);
+			ImGui::DragFloat("Speed", &m_Camera->MovementSpeed(), 0.01f, 0.0f, 10.0f);
 			if (ImGui::Button("Reset Camera"))
 				m_Camera->ResetForwardAndPosition();
-			ImGui::DragFloat("Sensitivity", &settings.MouseSensitivity, 0.002f, 0.0f, 2.0f);
-			ImGui::DragFloat("Speed", &settings.MovementSpeed, 0.01f, 0.0f, 10.0f);
-			m_Camera->SetMouseSensitivity(settings.MouseSensitivity);
-			m_Camera->SetMovementSpeed(settings.MovementSpeed);
-
 
 			ImGui::NewLine();
 
@@ -190,13 +205,14 @@ void Application::Run()
 
 			if (ImGui::Button("Add Sphere"))
 			{
-				Sphere newSphere(Eigen::Vector3f::Zero(), 0.5f, Color::LightGrey());
-				activeScene.Spheres().push_back(newSphere);
+				Sphere newSphere(Eigen::Vector3f::Zero(), 0.5f, 0);
+				activeScene.AddSphere(newSphere);
 			}
 
 			ImGui::NewLine();
 
 			std::vector<int> spheresToBeDeleted;
+			// Draw settings for all spheres in the scene
 			for (int i = 0; i < activeScene.Spheres().size(); i++)
 			{
 				ImGui::PushID(i);
@@ -204,9 +220,11 @@ void Application::Run()
 				Sphere& sphere = activeScene.Spheres()[i];
 				ImGui::DragFloat3("Position", sphere.Center.data(), 0.01f);
 				ImGui::DragFloat("Radius", &sphere.Radius, 0.01f);
-				Eigen::Vector3f albedo(sphere.Albedo.R, sphere.Albedo.G, sphere.Albedo.B);
+
+				Material& material = activeScene.Materials()[sphere.MaterialIndex];
+				Eigen::Vector3f albedo(material.Albedo.R, material.Albedo.G, material.Albedo.B);
 				ImGui::ColorEdit3("Albedo", albedo.data());
-				sphere.Albedo = Color(albedo.x(), albedo.y(), albedo.z());
+				material.Albedo = Color(albedo.x(), albedo.y(), albedo.z());
 
 				if (ImGui::Button("Delete"))
 					spheresToBeDeleted.push_back(i);
@@ -214,7 +232,7 @@ void Application::Run()
 				ImGui::PopID();
 				ImGui::NewLine();
 			}
-
+			// Delete flagged spheres
 			for (int i : spheresToBeDeleted)
 				activeScene.DeleteSphere(i);
 

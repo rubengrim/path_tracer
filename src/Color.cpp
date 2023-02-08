@@ -10,6 +10,16 @@ Color::Color(float r, float g, float b)
 {
 }
 
+Color::Color(Eigen::Vector3f vec3)
+	: R(vec3.x()), G(vec3.y()), B(vec3.z()), A(1.0f)
+{
+}
+
+Eigen::Vector3f Color::ToVec3()
+{
+	return Eigen::Vector3f(R, G, B);
+}
+
 float* Color::GetData3()
 {
 	float data[3] = { R, G, B };
@@ -93,6 +103,16 @@ Color Color::operator-(const Color& other) const
 	return ret;
 }
 
+Color Color::operator*(const Color& other) const
+{
+	Color ret;
+	ret.R = R * other.R;
+	ret.G = G * other.G;
+	ret.B = B * other.B;
+	ret.A = A;
+	return ret;
+}
+
 Color Color::operator*(const float& factor) const
 {
 	Color ret;
@@ -116,6 +136,14 @@ Color& Color::operator-=(const Color& other)
 	R -= other.R;
 	G -= other.G;
 	B -= other.B;
+	return *this;
+}
+
+Color& Color::operator*=(const Color& other)
+{
+	R *= other.R;
+	G *= other.G;
+	B *= other.B;
 	return *this;
 }
 

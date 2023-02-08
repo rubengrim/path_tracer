@@ -1,5 +1,5 @@
 #pragma once
-#include "Primitives.h"
+#include "Objects.h"
 #include "Ray.h"
 #include "Eigen/Dense"
 

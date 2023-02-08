@@ -11,6 +11,7 @@ public:
 
 // spdlog macros
 
+#define PULSE_DEBUG
 #ifdef PULSE_DEBUG
 #define PULSE_LOGGER_NAME	"Pulse"
 #define PULSE_TRACE(...)	if (spdlog::get(PULSE_LOGGER_NAME) != nullptr) { spdlog::get(PULSE_LOGGER_NAME)->trace(__VA_ARGS__); }

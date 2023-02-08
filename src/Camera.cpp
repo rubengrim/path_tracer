@@ -21,9 +21,19 @@ void Camera::Update(float timeStep)
 	if (Mouse::ButtonPressed(MouseButton::Right))
 	{
 		Mouse::HideCursor();
+		
+		m_HasMoved = false;
 
-		m_Pitch -= Mouse::GetDeltaY() * m_MouseSensitivity * timeStep;
-		m_Yaw -= Mouse::GetDeltaX() * m_MouseSensitivity * timeStep;
+		if (Mouse::GetDeltaX() != 0.0f || Mouse::GetDeltaY() != 0.0f)
+		{
+			m_HasMoved = true;
+		
+			m_Pitch -= Mouse::GetDeltaY() * m_MouseSensitivity * timeStep;
+			m_Pitch = std::clamp(m_Pitch, -1.5708f, 1.5708f); // Clamp pitch between -90 and 90 deg.
+			m_Yaw -= Mouse::GetDeltaX() * m_MouseSensitivity * timeStep;
+		}
+
+		Eigen::Vector3f prevPosition = m_Position;
 
 		float movementFactor = m_MovementSpeed * timeStep;
 
@@ -45,12 +55,22 @@ void Camera::Update(float timeStep)
 		if (Keyboard::KeyPressed(Key::Q)) // Down
 			m_Position -= Eigen::Vector3f::UnitY() * movementFactor;
 
-		RecalculateViewMatrix();
-		RecalculateRayDirections();
+		if (prevPosition != m_Position)
+		{
+			m_HasMoved = true;
+		}
+
+		if (m_HasMoved)
+		{
+			RecalculateViewMatrix();
+			RecalculateRayDirections();
+		}
 	}
 	else
+	{
 		Mouse::ShowCursor();
-
+		m_HasMoved = false;
+	}
 }
 
 void Camera::ResetForwardAndPosition()

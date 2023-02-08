@@ -1,8 +1,8 @@
 #include "Renderer.h"
 #include "Logger.h"
-#include "Primitives.h"
+#include "Objects.h"
 #include "Intersections.h"
-#include "MathUtils.h"
+#include "Utils.h"
 
 #include <cmath>
 #include <chrono>
@@ -11,120 +11,125 @@
 #include <algorithm>
 #include <vector>
 
+Renderer::Renderer(int viewportWidth, int viewportHeight)
+	: m_ViewportWidth(viewportWidth), m_ViewportHeight(viewportHeight)
+{
+	m_ImageData = new uint32_t[m_ViewportWidth * m_ViewportHeight];
+
+	m_AccumulatedData = new Eigen::Vector3f[m_ViewportWidth * m_ViewportHeight];
+}
+
+void Renderer::Resize(int viewportWidth, int viewportHeight)
+{
+	m_ViewportWidth = viewportWidth;
+	m_ViewportHeight = viewportHeight;
+
+	delete[] m_ImageData;
+	m_ImageData = new uint32_t[m_ViewportWidth * m_ViewportHeight];
+
+	delete[] m_AccumulatedData;
+	m_AccumulatedData = new Eigen::Vector3f[m_ViewportWidth * m_ViewportHeight];
+	
+	m_FrameIndex = 1;
+}
+
 bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& timeToRender)
 {
+	auto start = std::chrono::high_resolution_clock::now();
+
 	m_Scene = &scene;
 	m_Camera = &camera;
 
-	if (image.GetWidth() != m_Camera->GetViewportWidth() || image.GetHeight() != m_Camera->GetViewportHeight())
-	{
-		PULSE_ERROR("Trying to render to an image that has different dimensions than the camera.")
-		return false;
-	}
-
-	m_ImageData = new uint32_t[m_Camera->GetViewportWidth() * m_Camera->GetViewportHeight()];
-
-	auto start = std::chrono::high_resolution_clock::now();
+	if (m_FrameIndex == 1)
+		memset(m_AccumulatedData, 0, m_ViewportWidth * m_ViewportHeight * sizeof(Eigen::Vector3f));
 
 #define MULTI_THREADING 1
 #if MULTI_THREADING
 
 	std::vector<int> yValues;
-	for (int y = 0; y < m_Camera->GetViewportHeight(); y++)
+	for (int y = 0; y < m_ViewportHeight; y++)
 		yValues.push_back(y);
 
 	std::for_each(std::execution::par, yValues.begin(), yValues.end(), [&](int& y)
 	{
-		RenderBlock(y, y);
+		for (int x = 0; x < m_ViewportWidth; x++)
+		{
+			Color pixelColor = PerPixel(x, y);
+			pixelColor.Clamp();
+			m_AccumulatedData[x + y * m_ViewportWidth] += pixelColor.ToVec3();
+
+			Color accumulatedPixelColor(m_AccumulatedData[x + y * m_ViewportWidth] * (1.0f / m_FrameIndex));
+			m_ImageData[x + y * m_ViewportWidth] = accumulatedPixelColor.RGBA();
+		}
 	});
 
 #else
 
-	RenderBlock(0, m_Camera->GetViewportHeight() - 1);
+	for (int y = 0; y < m_ViewportHeight; y++)
+	{
+		for (int x = 0; x < m_ViewportWidth; x++)
+		{
+			//Color pixelColor = PerPixel(x, y);
+			//pixelColor.Clamp();
+			//m_AccumulatedData[x + y * m_ViewportWidth] += pixelColor.ToVec3();
+
+			//Color accumulatedPixelColor(m_AccumulatedData[x + y * m_ViewportWidth] * (1.0f / m_FrameIndex));
+			//m_ImageData[x + y * m_ViewportWidth] = accumulatedPixelColor.RGBA();
+		}
+	}
 
 #endif
+
+
+	m_FrameIndex++;
+
+	image.SetImageData(m_ImageData);
 
 	auto finished = std::chrono::high_resolution_clock::now();
 	timeToRender = std::chrono::duration_cast<std::chrono::microseconds>(finished - start).count() * 0.001f;
 
-	image.SetImageData(m_ImageData);
-	delete[] m_ImageData;
-
 	return true;
-}
-
-void Renderer::RenderBlock(int yBegin, int yEnd)
-{
-	for (int y = yBegin; y <= yEnd; y++)
-	{
-		for (int x = 0; x < m_Camera->GetViewportWidth(); x++)
-		{
-			Color pixelColor = PerPixel(x, y);
-			pixelColor.Clamp();
-			m_ImageData[x + y * m_Camera->GetViewportWidth()] = pixelColor.RGBA();
-		}
-	}
 }
 
 Color Renderer::PerPixel(int x, int y)
 {
-	Ray ray;
-	ray.Origin = m_Camera->GetPosition();
-	ray.Direction = m_Camera->GetRayDirections()[x + y * m_Camera->GetViewportWidth()];
-
 	Color pixelColor = Color::Black();
 
-	int bounces = 5;
-
-	float rayContributionFactor = 1.0f;
-	for (int bounce = 0; bounce < bounces; bounce++)
+	int spp = 1;
+	for (int sample = 0; sample < spp; sample++)
 	{
-		Payload payload = CastRay(ray);
-		
-		if (payload.HitDistance == -1.0f)
-		{
-			pixelColor += Color::DarkGrey() * rayContributionFactor;
-			break;
-		}
-		else
-		{
-			pixelColor += payload.Color * rayContributionFactor;
-		
-			ray.Origin = payload.Position + 0.0001f * payload.Normal;
-			ray.Direction = (ray.Direction - 2 * ray.Direction.dot(payload.Normal) * payload.Normal).normalized();
-		}
+		Ray ray;
+		ray.Origin = m_Camera->GetPosition();
+		ray.Direction = m_Camera->GetRayDirections()[x + y * m_Camera->GetViewportWidth()];
 
-		rayContributionFactor *= 0.7f;
+		Color throughput = Color::White();
+		int bounces = 4;
+		for (int bounce = 0; bounce < bounces; bounce++)
+		{
+			HitContext context = CastRay(ray);
+
+			// Ray missed - add background color and break.
+			if (!context.CorrespondsToValidHit)
+			{
+				pixelColor += throughput * Color::White();
+				break;
+			}
+
+			Material material = m_Scene->Materials()[context.MaterialIndex];
+			Color res = material.Sample(context);
+			float pdf = material.Pdf(context);
+
+			throughput *= res;
+
+			ray.Origin = context.WorldPosition + 0.0001f * context.WorldNormal;
+			ray.Direction = context.ToWorld(context.LocalIncidentDirection).normalized();
+		}
 	}
 
-	return pixelColor;
+	return pixelColor * (1.0f / (float)spp);
 }
 
-Color Renderer::TracePath(Ray ray)
-{
-	Color pixelColor = Color::Black();
-
-	int bounces = 3;
-	
-	float multiplier = 1.0f;
-	for (int bounce = 0; bounce < bounces; bounce++)
-	{
-		Payload payload = CastRay(ray);
-		if (payload.HitDistance == -1.0f)
-			pixelColor += Color::DarkGrey() * multiplier;
-
-		pixelColor = payload.Color * multiplier;
-		
-		multiplier *= 0.7f;
-
-		ray.Origin = payload.Position + 0.0001f * payload.Normal;
-		ray.Direction = (ray.Direction - 2 * ray.Direction.dot(payload.Normal) * payload.Normal).normalized();
-	}
-
-	return pixelColor;
-}
-
-Payload Renderer::CastRay(Ray ray)
+HitContext Renderer::CastRay(Ray ray)
 {
 	int closestSphereIndex;
 	float smallestT = -1.0f;
@@ -147,35 +152,19 @@ Payload Renderer::CastRay(Ray ray)
 	// No intersection found.
 	if (smallestT == -1.0f)
 	{
-		Payload payload;
-		payload.HitDistance = -1.0f;
-		return payload;
+		HitContext context;
+		context.CorrespondsToValidHit = false;
+		return context;
 	}
 	
-	return HitShader(ray, smallestT, closestSphereIndex);
-}
+	Eigen::Vector3f normal = (ray.At(smallestT) - m_Scene->Spheres()[closestSphereIndex].Center).normalized();
+	HitContext context(normal);
+	Sphere sphere = m_Scene->Spheres()[closestSphereIndex];
+	Color albedo = m_Scene->Materials()[sphere.MaterialIndex].Albedo;
+	context.Albedo = albedo;
+	context.HitDistance = smallestT;
+	context.WorldPosition = ray.At(smallestT);
+	context.LocalOutgoingDirection = context.ToLocal(-ray.Direction);
 
-Payload Renderer::HitShader(Ray ray, float hitDistance, int objectIndex)
-{
-	Payload payload;
-	payload.ObjectIndex = objectIndex;
-	payload.HitDistance = hitDistance;
-	payload.Position = ray.At(payload.HitDistance);
-
-	const Sphere& sphere = m_Scene->Spheres()[payload.ObjectIndex];
-	payload.Normal = (payload.Position - sphere.Center).normalized();
-	
-	Eigen::Vector3f lightPosition(1.0f, 1.0f, -2.5f);
-	Eigen::Vector3f toLight = (lightPosition - payload.Position).normalized();
-
-	float cosineFactor = payload.Normal.dot(toLight);
-
-	if (cosineFactor < 0.0f)
-		cosineFactor = 0.0f;
-	else if (cosineFactor > 1.0f)
-		cosineFactor = 1.0f;
-
-	payload.Color = sphere.Albedo * cosineFactor;
-
-	return payload;
+	return context;
 }
