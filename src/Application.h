@@ -20,14 +20,6 @@ public:
 	void Shutdown();
 
 private:
-	struct Settings
-	{
-		float MovementSpeed;
-		float MouseSensitivity;
-	};
-
-	void DrawSettingsWindow(Settings& settings);
-
 	GLFWwindow* m_WindowHandle;
 
 	Logger m_Logger;

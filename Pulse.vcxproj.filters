@@ -13,6 +13,15 @@
     <Filter Include="external\imgui\imgui\backends">
       <UniqueIdentifier>{26DD369D-92F5-1DC7-5BA2-AD60C779B260}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external\imgui\misc">
+      <UniqueIdentifier>{AD4293C7-19A4-70D5-A211-B7870E72A794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui\misc\cpp">
+      <UniqueIdentifier>{FF4ABA0F-6B82-02A7-748C-66CAE04229A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui\misc\fonts">
+      <UniqueIdentifier>{C6CAAEE7-328D-E271-7B3D-71FEE73EBB4F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -42,7 +51,13 @@
     <ClInclude Include="external\imgui\imgui\imstb_truetype.h">
       <Filter>external\imgui\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="external\imgui\misc\cpp\imgui_stdlib.h">
+      <Filter>external\imgui\misc\cpp</Filter>
+    </ClInclude>
     <ClInclude Include="src\Application.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BSDF.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Camera.h">
@@ -63,13 +78,16 @@
     <ClInclude Include="src\Logger.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Utils.h">
+    <ClInclude Include="src\Material.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Mouse.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Objects.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Random.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Ray.h">
@@ -81,13 +99,12 @@
     <ClInclude Include="src\Scene.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Utils.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\Window.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\BSDF.h" />
-    <ClInclude Include="src\Material.h" />
-    <ClInclude Include="src\Random.h" />
-    <ClInclude Include="src\HitContext.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\imgui\imgui\backends\imgui_impl_glfw.cpp">
@@ -111,7 +128,13 @@
     <ClCompile Include="external\imgui\imgui\imgui_widgets.cpp">
       <Filter>external\imgui\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="external\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>external\imgui\misc\cpp</Filter>
+    </ClCompile>
     <ClCompile Include="src\Application.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BSDF.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Camera.cpp">
@@ -138,14 +161,37 @@
     <ClCompile Include="src\Mouse.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Random.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Renderer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Window.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils.cpp" />
-    <ClCompile Include="src\BSDF.cpp" />
-    <ClCompile Include="src\Random.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="external\imgui\misc\fonts\Cousine-Regular.ttf">
+      <Filter>external\imgui\misc\fonts</Filter>
+    </None>
+    <None Include="external\imgui\misc\fonts\DroidSans.ttf">
+      <Filter>external\imgui\misc\fonts</Filter>
+    </None>
+    <None Include="external\imgui\misc\fonts\Karla-Regular.ttf">
+      <Filter>external\imgui\misc\fonts</Filter>
+    </None>
+    <None Include="external\imgui\misc\fonts\ProggyClean.ttf">
+      <Filter>external\imgui\misc\fonts</Filter>
+    </None>
+    <None Include="external\imgui\misc\fonts\ProggyTiny.ttf">
+      <Filter>external\imgui\misc\fonts</Filter>
+    </None>
+    <None Include="external\imgui\misc\fonts\Roboto-Medium.ttf">
+      <Filter>external\imgui\misc\fonts</Filter>
+    </None>
   </ItemGroup>
 </Project>

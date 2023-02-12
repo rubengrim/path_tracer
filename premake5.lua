@@ -21,6 +21,9 @@ project "Pulse"
 		"src/**.h",
 		"external/imgui/imgui/*.cpp",
 		"external/imgui/imgui/*.h",
+		"external/imgui/misc/cpp/*.cpp",
+		"external/imgui/misc/cpp/*.h",
+		"external/imgui/misc/fonts/*.ttf",
 		"external/imgui/imgui/backends/imgui_impl_glfw.cpp",
 		"external/imgui/imgui/backends/imgui_impl_glfw.h",
 		"external/imgui/imgui/backends/imgui_impl_opengl3.cpp",
@@ -30,6 +33,7 @@ project "Pulse"
 	includedirs
 	{
 		"external/imgui",
+		"external/imgui/misc/cpp",
 		"external/spdlog/include",
 		"external/GLFW/include",
 		"external/glad/include",

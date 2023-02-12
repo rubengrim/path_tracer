@@ -2,6 +2,12 @@
 #include "Eigen/Dense"
 #include <vector>
 
+struct CameraSettings
+{
+	float MovementSpeed;
+	float MouseSensitivity;
+};
+
 class Camera
 {
 public:
@@ -24,8 +30,8 @@ public:
 	inline int GetViewportWidth() const { return m_ViewportWidth; }
 	inline int GetViewportHeight() const { return m_ViewportHeight; }
 	
-	inline float& MouseSensitivity() { return m_MouseSensitivity; }
-	inline float& MovementSpeed() { return m_MovementSpeed; }
+	inline void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
+	inline void SetMovementSpeed(float movementSpeed) { m_MovementSpeed = movementSpeed; }
 
 private:
 	void RecalculateViewMatrix();

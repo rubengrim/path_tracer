@@ -10,6 +10,7 @@
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
+#include "imgui_stdlib.h"
 
 #include "Eigen/Core"
 
@@ -17,6 +18,7 @@
 #include <chrono>
 #include <thread>
 #include <memory>
+#include <string>
 
 Application::~Application()
 {
@@ -71,8 +73,8 @@ bool Application::Initialize()
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 
 	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
+	//ImGui::StyleColorsDark();
+	ImGui::StyleColorsLight();
 
 	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -85,6 +87,8 @@ bool Application::Initialize()
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(m_WindowHandle, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+
+	io.Fonts->AddFontFromFileTTF("external/imgui/misc/fonts/Cousine-Regular.ttf", 13.0f);
 	// END: Initialize IMGUI
 
 	Mouse::Initialize(m_WindowHandle);
@@ -111,19 +115,27 @@ void Application::Run()
 	// Set up scene
 	Scene activeScene;
 
-	Material defaultGrey(Color::DarkGrey());
-	Material red(Color::Red());
-	Material green(Color::Green());
-	activeScene.AddMaterials({defaultGrey, red, green});
+	Material lightGrey("Light grey", Color::LightGrey());
+	Material red("Red", Color::Red());
+	Material green("Green", Color::Green());
+	Material emissive("White emissive", Color::White(), true, 100.0f, Color::White());
+	activeScene.AddMaterials({lightGrey, red, green, emissive});
 
+	Sphere ground(Eigen::Vector3f(0.0f, -50.5f, -4.0f), 50.0f, 0);
 	Sphere sphere1(Eigen::Vector3f(0.0f, 0.0f, -4.0f), 0.5f, 1);
-	//Sphere sphere2(Eigen::Vector3f(0.7f, 0.0f, -4.0f), 0.3f, 2);
-	Sphere sphere3(Eigen::Vector3f(0.0f, -50.5f, -4.0f), 50.0f, 0);
-	activeScene.AddSpheres({sphere1, sphere3});
+	Sphere lightSource(Eigen::Vector3f(0.0f, 1.0f, -4.0f), 0.2f, 3);
+	activeScene.AddSpheres({sphere1, ground, lightSource});
 
-	Settings settings;
-	settings.MouseSensitivity = 0.07f;
-	settings.MovementSpeed = 1.0f;
+	CameraSettings cameraSettings;
+	cameraSettings.MouseSensitivity = 0.07f;
+	cameraSettings.MovementSpeed = 1.0f;
+
+	RenderSettings renderSettings;
+	renderSettings.Accumulate = true;
+	renderSettings.MaxAccumulatedSamples = 100;
+	renderSettings.AccumulateForever = true;
+	renderSettings.BackgroundColor = Color::DarkGrey();
+	bool shouldResetAccumulation = false;
 
 	auto beginFrame = std::chrono::high_resolution_clock::now();
 	auto endFrame = std::chrono::high_resolution_clock::now();
@@ -137,6 +149,9 @@ void Application::Run()
 		float timeStep = std::chrono::duration_cast<std::chrono::microseconds>(endFrame - beginFrame).count() * 0.000001f;
 		beginFrame = std::chrono::high_resolution_clock::now();
 
+		m_Camera->SetMouseSensitivity(cameraSettings.MouseSensitivity);
+		m_Camera->SetMovementSpeed(cameraSettings.MovementSpeed);
+
 		glfwSwapBuffers(m_WindowHandle);
 		glfwPollEvents();
 
@@ -145,18 +160,21 @@ void Application::Run()
 
 		m_Camera->Update(timeStep);
 
-		if (m_Camera->HasMoved())
+		if (m_Camera->HasMoved() || shouldResetAccumulation)
 			m_Renderer->ResetAccumulation();
-		m_Renderer->Render(*m_Image, activeScene, *m_Camera, timeToRender);
-		
+		m_Renderer->Render(*m_Image, activeScene, *m_Camera, timeToRender, renderSettings);
+		shouldResetAccumulation = false;
+
 		// BEGIN: Render GUI
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport();
 
+		float widgetWidth = ImGui::GetFontSize() * 12.0f;
+
 		// Viewport
-		{ 
+		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 			ImGui::Begin("Viewport");
 
@@ -173,7 +191,7 @@ void Application::Run()
 
 			if (m_Image)
 				ImGui::Image((void*)(intptr_t)(m_Image->GetTextureId()), ImVec2(m_Image->GetWidth(), m_Image->GetHeight()));
-				
+
 			ImGui::End();
 			ImGui::PopStyleVar();
 		}
@@ -189,53 +207,153 @@ void Application::Run()
 			ImGui::End();
 		}
 
-		// Settings window
+
 		{
 			ImGui::Begin("Settings");
+			ImGui::PushItemWidth(widgetWidth);
 
+			// Camera settings
 			ImGui::Text("CAMERA");
-			ImGui::DragFloat("Sensitivity", &m_Camera->MouseSensitivity(), 0.002f, 0.0f, 2.0f);
-			ImGui::DragFloat("Speed", &m_Camera->MovementSpeed(), 0.01f, 0.0f, 10.0f);
+			ImGui::DragFloat("Sensitivity", &cameraSettings.MouseSensitivity, 0.002f, 0.0f, 2.0f);
+			ImGui::DragFloat("Speed", &cameraSettings.MovementSpeed, 0.01f, 0.0f, 10.0f);
 			if (ImGui::Button("Reset Camera"))
-				m_Camera->ResetForwardAndPosition();
-
-			ImGui::NewLine();
-
-			ImGui::Text("SCENE");
-
-			if (ImGui::Button("Add Sphere"))
 			{
-				Sphere newSphere(Eigen::Vector3f::Zero(), 0.5f, 0);
-				activeScene.AddSphere(newSphere);
+				m_Camera->ResetForwardAndPosition();
+				shouldResetAccumulation = true;
 			}
 
 			ImGui::NewLine();
 
+			// Render settings
+			ImGui::Text("RENDERING");
+			shouldResetAccumulation |= ImGui::Checkbox("Accumulate samples", &renderSettings.Accumulate);
+			shouldResetAccumulation |= ImGui::Checkbox("Accumulate forever", &renderSettings.AccumulateForever);
+			shouldResetAccumulation |= ImGui::DragInt("Max samples", &renderSettings.MaxAccumulatedSamples, 0.5f, 0, 1000);
+			
+			ImGui::NewLine();
+			
+			// Background color
+			Eigen::Vector3f backgroundColor = renderSettings.BackgroundColor.ToVec3();
+			shouldResetAccumulation |= ImGui::ColorEdit3("Background color", backgroundColor.data());
+			renderSettings.BackgroundColor = Color(backgroundColor);
+			
+			ImGui::PopItemWidth();
+			ImGui::End();
+		}
+
+		// Materials
+		{
+			ImGui::Begin("Materials");
+			ImGui::PushItemWidth(widgetWidth);
+
+			ImGui::Text("MATERIALS");
+
+			std::vector<int> materialsToBeDeleted;
+			for (int i = 0; i < activeScene.Materials().size(); i++)
+			{
+
+				ImGui::PushID(i);
+
+				Material& material = activeScene.Materials()[i];
+				ImGui::InputText("Name", &material.Name);
+				Eigen::Vector3f albedo = material.Albedo.ToVec3();
+				shouldResetAccumulation |= ImGui::ColorEdit3("Albedo", albedo.data());
+				material.Albedo = Color(albedo);
+				shouldResetAccumulation |= ImGui::Checkbox("Emits light", &material.EmitsLight);
+				shouldResetAccumulation |= ImGui::DragFloat("Light intensity", &material.LightIntensity);
+				Eigen::Vector3f lightColor = material.LightColor.ToVec3();
+				shouldResetAccumulation |= ImGui::ColorEdit3("Light color", lightColor.data());
+				material.LightColor = Color(lightColor);
+
+				if (ImGui::Button("Delete"))
+				{
+					materialsToBeDeleted.push_back(i);
+					shouldResetAccumulation = true;
+				}
+
+				ImGui::PopID();
+				ImGui::NewLine();
+			}
+			// Delete flagged materials.
+			for (int matID : materialsToBeDeleted)
+			{
+				activeScene.DeleteMaterial(matID);
+				for (Sphere& sphere : activeScene.Spheres())
+				{
+					if (sphere.MaterialID == matID)
+						sphere.MaterialID = 0;
+				}
+			}
+
+			if (ImGui::Button("Add Material"))
+			{
+				Material newMaterial("New material", Color::LightGrey());
+				activeScene.AddMaterial(newMaterial);
+				shouldResetAccumulation = true;
+			}
+
+			ImGui::PopItemWidth();
+			ImGui::End();
+		}
+
+		// Spheres
+		{
+			ImGui::Begin("Spheres");
+			ImGui::PushItemWidth(widgetWidth);
+			ImGui::Text("SPHERES");
+
 			std::vector<int> spheresToBeDeleted;
-			// Draw settings for all spheres in the scene
 			for (int i = 0; i < activeScene.Spheres().size(); i++)
 			{
 				ImGui::PushID(i);
 
 				Sphere& sphere = activeScene.Spheres()[i];
-				ImGui::DragFloat3("Position", sphere.Center.data(), 0.01f);
-				ImGui::DragFloat("Radius", &sphere.Radius, 0.01f);
+				shouldResetAccumulation |= ImGui::DragFloat3("Position", sphere.Center.data(), 0.01f);
+				shouldResetAccumulation |= ImGui::DragFloat("Radius", &sphere.Radius, 0.01f);
 
-				Material& material = activeScene.Materials()[sphere.MaterialIndex];
-				Eigen::Vector3f albedo(material.Albedo.R, material.Albedo.G, material.Albedo.B);
-				ImGui::ColorEdit3("Albedo", albedo.data());
-				material.Albedo = Color(albedo.x(), albedo.y(), albedo.z());
+				std::vector<Material>& materials = activeScene.Materials();
+				int selected = sphere.MaterialID;
+				if (ImGui::BeginCombo("Material", activeScene.GetMaterial(selected).Name.c_str()))
+				{
+					for (int i = 0; i < materials.size(); i++)
+					{
+						bool isSelected = selected == sphere.MaterialID;
+						if (ImGui::Selectable(activeScene.GetMaterial(i).Name.c_str(), &isSelected))
+						{
+							selected = i;
+							shouldResetAccumulation = true;
+						}
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+
+					ImGui::EndCombo();
+				}
+				sphere.MaterialID = selected;
 
 				if (ImGui::Button("Delete"))
+				{
 					spheresToBeDeleted.push_back(i);
+					shouldResetAccumulation = true;
+				}
 
 				ImGui::PopID();
 				ImGui::NewLine();
 			}
-			// Delete flagged spheres
-			for (int i : spheresToBeDeleted)
-				activeScene.DeleteSphere(i);
 
+			
+			// Delete flagged spheres.
+			for (int sphereID : spheresToBeDeleted)
+				activeScene.DeleteSphere(sphereID);
+
+			if (ImGui::Button("Add Sphere"))
+			{
+				Sphere newSphere(Eigen::Vector3f::Zero(), 0.5f, 0);
+				activeScene.AddSphere(newSphere);
+				shouldResetAccumulation = true;
+			}
+
+			ImGui::PopItemWidth();
 			ImGui::End();
 		}
 
@@ -252,6 +370,7 @@ void Application::Run()
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
+
 		// END: Render GUI
 
 		m_IsRunning = !glfwWindowShouldClose(m_WindowHandle);

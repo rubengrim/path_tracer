@@ -3,6 +3,7 @@
 #include "Objects.h"
 #include "Intersections.h"
 #include "Utils.h"
+#include "Random.h"
 
 #include <cmath>
 #include <chrono>
@@ -10,6 +11,7 @@
 #include <execution>
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 Renderer::Renderer(int viewportWidth, int viewportHeight)
 	: m_ViewportWidth(viewportWidth), m_ViewportHeight(viewportHeight)
@@ -33,8 +35,17 @@ void Renderer::Resize(int viewportWidth, int viewportHeight)
 	m_FrameIndex = 1;
 }
 
-bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& timeToRender)
+bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& timeToRender, const RenderSettings& renderSettings)
 {
+	if (!renderSettings.Accumulate)
+		m_FrameIndex = 1;
+
+	if (!renderSettings.AccumulateForever && renderSettings.MaxAccumulatedSamples <= m_FrameIndex)
+	{
+		timeToRender = 0.0f;
+		return false;
+	}
+
 	auto start = std::chrono::high_resolution_clock::now();
 
 	m_Scene = &scene;
@@ -54,11 +65,11 @@ bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& t
 	{
 		for (int x = 0; x < m_ViewportWidth; x++)
 		{
-			Color pixelColor = PerPixel(x, y);
-			pixelColor.Clamp();
+			Color pixelColor = PerPixel(x, y, renderSettings);
 			m_AccumulatedData[x + y * m_ViewportWidth] += pixelColor.ToVec3();
 
 			Color accumulatedPixelColor(m_AccumulatedData[x + y * m_ViewportWidth] * (1.0f / m_FrameIndex));
+			accumulatedPixelColor.Clamp();
 			m_ImageData[x + y * m_ViewportWidth] = accumulatedPixelColor.RGBA();
 		}
 	});
@@ -91,45 +102,57 @@ bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& t
 	return true;
 }
 
-Color Renderer::PerPixel(int x, int y)
+Color Renderer::PerPixel(int x, int y, const RenderSettings& renderSettings)
 {
+	Ray ray;
+	ray.Origin = m_Camera->GetPosition();
+	ray.Direction = m_Camera->GetRayDirections()[x + y * m_Camera->GetViewportWidth()];
+
 	Color pixelColor = Color::Black();
+	Color throughput = Color::White();
 
-	int spp = 1;
-	for (int sample = 0; sample < spp; sample++)
+
+	int maxBounces = 40; // Termination of paths is mainly handled by russian roulette, but the number of bounces can still be limited.
+	for (int bounce = 0; bounce < maxBounces; bounce++)
 	{
-		Ray ray;
-		ray.Origin = m_Camera->GetPosition();
-		ray.Direction = m_Camera->GetRayDirections()[x + y * m_Camera->GetViewportWidth()];
+		CastRay(ray);
 
-		Color throughput = Color::White();
-		int bounces = 4;
-		for (int bounce = 0; bounce < bounces; bounce++)
+		// Ray missed - add background color and break.
+		if (!ray.Payload.RayHitSomething)
 		{
-			HitContext context = CastRay(ray);
-
-			// Ray missed - add background color and break.
-			if (!context.CorrespondsToValidHit)
-			{
-				pixelColor += throughput * Color::White();
-				break;
-			}
-
-			Material material = m_Scene->Materials()[context.MaterialIndex];
-			Color res = material.Sample(context);
-			float pdf = material.Pdf(context);
-
-			throughput *= res;
-
-			ray.Origin = context.WorldPosition + 0.0001f * context.WorldNormal;
-			ray.Direction = context.ToWorld(context.LocalIncidentDirection).normalized();
+			pixelColor += throughput * renderSettings.BackgroundColor;
+			break;
 		}
+
+		// Create matrices that transform directions to and from the local coordinate system aligned to the normal of the hit.
+		Eigen::Matrix3f localToWorld = Utils::CreateOrthogonalBasis(ray.Payload.WorldNormal);
+		//Eigen::Matrix3f worldToLocal = localToWorld.inverse();
+
+		Sphere& sphere = m_Scene->Spheres()[ray.Payload.ObjectID];
+		Material& material = m_Scene->Materials()[sphere.MaterialID];
+
+		if (material.EmitsLight)
+			pixelColor += throughput * material.LightColor * material.LightIntensity;
+
+		// Sample an incident direction (in local space).
+		Eigen::Vector3f incidentDirection;
+		throughput *= BSDF::Lambertian::Sample(&incidentDirection, material.Albedo);
+
+		// Russian roulette
+		float p = std::max(throughput.R, std::max(throughput.G, throughput.B));
+		if (Random::Float() > p)
+			break;
+
+		throughput *= 1.0f / p;
+
+		ray.Origin = ray.Payload.WorldPosition + 0.0001f * ray.Payload.WorldNormal;
+		ray.Direction = localToWorld * incidentDirection;
 	}
 
-	return pixelColor * (1.0f / (float)spp);
+	return pixelColor;
 }
 
-HitContext Renderer::CastRay(Ray ray)
+void Renderer::CastRay(Ray& ray)
 {
 	int closestSphereIndex;
 	float smallestT = -1.0f;
@@ -149,22 +172,17 @@ HitContext Renderer::CastRay(Ray ray)
 		}
 	}
 
-	// No intersection found.
-	if (smallestT == -1.0f)
+	if (smallestT == -1.0f) // No intersection found.
 	{
-		HitContext context;
-		context.CorrespondsToValidHit = false;
-		return context;
+		ray.Payload.RayHitSomething = false;
 	}
-	
-	Eigen::Vector3f normal = (ray.At(smallestT) - m_Scene->Spheres()[closestSphereIndex].Center).normalized();
-	HitContext context(normal);
-	Sphere sphere = m_Scene->Spheres()[closestSphereIndex];
-	Color albedo = m_Scene->Materials()[sphere.MaterialIndex].Albedo;
-	context.Albedo = albedo;
-	context.HitDistance = smallestT;
-	context.WorldPosition = ray.At(smallestT);
-	context.LocalOutgoingDirection = context.ToLocal(-ray.Direction);
-
-	return context;
+	else
+	{
+		ray.Payload.RayHitSomething = true;
+		ray.Payload.ObjectID = closestSphereIndex;
+		ray.Payload.HitDistance = smallestT;
+		ray.Payload.WorldPosition = ray.At(smallestT);
+		Eigen::Vector3f normal = (ray.Payload.WorldPosition - m_Scene->Spheres()[closestSphereIndex].Center).normalized();
+		ray.Payload.WorldNormal = normal;
+	}
 }

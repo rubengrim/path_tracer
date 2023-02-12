@@ -6,22 +6,29 @@
 #include "Scene.h"
 #include "Color.h"
 #include "Material.h"
-#include "HitContext.h"
 
 #include <stdint.h>
+
+struct RenderSettings
+{
+	bool Accumulate;
+	bool AccumulateForever;
+	int MaxAccumulatedSamples;
+	Color BackgroundColor;
+};
 
 class Renderer
 {
 public:
 	Renderer(int viewportHeight, int viewportWidth);
-	bool Render(Image& image, Scene& scene, const Camera& camera, float& timeToRender);
+	bool Render(Image& image, Scene& scene, const Camera& camera, float& timeToRender, const RenderSettings& renderSettings);
 	void Resize(int width, int height);
 	inline void ResetAccumulation() { m_FrameIndex = 1; }
 
 private:
 
-	Color PerPixel(int x, int y);
-	HitContext CastRay(Ray ray);
+	Color PerPixel(int x, int y, const RenderSettings& renderSettings);
+	void CastRay(Ray& ray);
 
 private:
 	int m_ViewportWidth = 0;

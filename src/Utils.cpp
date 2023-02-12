@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include "Random.h"
 
 namespace Utils {
 
@@ -50,6 +51,25 @@ namespace Utils {
 		f = ClampfMin(f, min);
 		f = ClampfMax(f, max);
 		return f;
+	}
+
+	Eigen::Matrix3f CreateOrthogonalBasis(Eigen::Vector3f n)
+	{
+		// Create orthogonal basis vectors from n.
+		Eigen::Vector3f s = Eigen::Vector3f::Zero();
+		while (s == Eigen::Vector3f::Zero())
+			s = n.cross(Random::Vec3f());
+		
+		//s = WorldNormal.cross(Eigen::Vector3f(WorldNormal.z(), WorldNormal.x(), WorldNormal.y())).normalized();
+		Eigen::Vector3f t = s.cross(n).normalized();
+
+		// T is the local-to-world matrix, T's inverse is the world-to-local.
+		Eigen::Matrix3f T;
+		T << s.x(), t.x(), n.x(),
+			s.y(), t.y(), n.y(),
+			s.z(), t.z(), n.z();
+
+		return T;
 	}
 
 }

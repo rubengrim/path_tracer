@@ -6,17 +6,18 @@
 
 namespace BSDF::Lambertian {
 
-	Color Eval(HitContext& context)
+	Color Eval(Color albedo)
 	{
-		return context.Albedo * INV_PI;
+		return albedo * INV_PI;
 	}
 
-	float Pdf(HitContext& context)
+	float Pdf(Eigen::Vector3f incidentDirection)
 	{
-		return context.LocalIncidentDirection.z() * INV_PI;
+		// This is calculating cos(theta) * INV_PI, where theta is the angle between incident and normal, but since incident is in local coords cos(theta) is just its z-value.
+		return incidentDirection.z() * INV_PI;
 	}
 
-	Color Sample(HitContext& context)
+	Color Sample(Eigen::Vector3f* incidentDirection, Color albedo)
 	{
 		float u1 = Random::Float();
 		float u2 = Random::Float();
@@ -27,10 +28,10 @@ namespace BSDF::Lambertian {
 		float x = r * cos(theta);
 		float y = r * sin(theta);
 
-		context.LocalIncidentDirection = Eigen::Vector3f(x, y, std::max(0.0f, sqrt(1.0f - u1))).normalized();
+		*incidentDirection = Eigen::Vector3f(x, y, std::max(0.0f, sqrt(1.0f - u1))).normalized();
 
 		// Eval() / PDF() * cos(theta) = albedo
-		return context.Albedo;
+		return albedo;
 
 		//float u1 = Random::Float();
 		//float u2 = Random::Float();
