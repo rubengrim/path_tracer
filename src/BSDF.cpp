@@ -6,9 +6,9 @@
 
 namespace BSDF::Lambertian {
 
-	Color Eval(Color albedo)
+	Color Eval(Color albedo, Eigen::Vector3f incidentDirection)
 	{
-		return albedo * INV_PI;
+		return albedo * INV_PI * incidentDirection.z();
 	}
 
 	float Pdf(Eigen::Vector3f incidentDirection)

@@ -14,7 +14,7 @@ public:
 	static Color DarkGrey() { return Color(0.1f, 0.1f, 0.1f); }
 	static Color LightGrey() { return Color(0.5f, 0.5f, 0.5f); }
 	static Color White() { return Color(1.0f, 1.0f, 1.0f); }
-
+	 
 public:
 	Color() = default;
 	Color(float r, float g, float b);

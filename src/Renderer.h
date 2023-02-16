@@ -29,6 +29,7 @@ private:
 
 	Color PerPixel(int x, int y, const RenderSettings& renderSettings);
 	void CastRay(Ray& ray);
+	Color EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld);
 
 private:
 	int m_ViewportWidth = 0;

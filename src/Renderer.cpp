@@ -112,7 +112,7 @@ Color Renderer::PerPixel(int x, int y, const RenderSettings& renderSettings)
 	Color throughput = Color::White();
 
 
-	int maxBounces = 40; // Termination of paths is mainly handled by russian roulette, but the number of bounces can still be limited.
+	int maxBounces = 1;
 	for (int bounce = 0; bounce < maxBounces; bounce++)
 	{
 		CastRay(ray);
@@ -126,17 +126,21 @@ Color Renderer::PerPixel(int x, int y, const RenderSettings& renderSettings)
 
 		// Create matrices that transform directions to and from the local coordinate system aligned to the normal of the hit.
 		Eigen::Matrix3f localToWorld = Utils::CreateOrthogonalBasis(ray.Payload.WorldNormal);
-		//Eigen::Matrix3f worldToLocal = localToWorld.inverse();
+		Eigen::Matrix3f worldToLocal = localToWorld.inverse();
 
 		Sphere& sphere = m_Scene->Spheres()[ray.Payload.ObjectID];
 		Material& material = m_Scene->Materials()[sphere.MaterialID];
 
-		if (material.EmitsLight)
-			pixelColor += throughput * material.LightColor * material.LightIntensity;
+		//if (material.EmitsLight)
+		//	pixelColor += throughput * material.LightColor * material.LightIntensity;
+
+		pixelColor += throughput * EvaluateDirectLight(ray, material, worldToLocal, localToWorld);
 
 		// Sample an incident direction (in local space).
 		Eigen::Vector3f incidentDirection;
-		throughput *= BSDF::Lambertian::Sample(&incidentDirection, material.Albedo);
+		Color multiplier = BSDF::Lambertian::Sample(&incidentDirection, material.Albedo);
+		throughput *= BSDF::Lambertian::Eval(material.Albedo, incidentDirection) * (1.0f / BSDF::Lambertian::Pdf(incidentDirection));
+		//throughput *= multiplier;
 
 		// Russian roulette
 		float p = std::max(throughput.R, std::max(throughput.G, throughput.B));
@@ -185,4 +189,35 @@ void Renderer::CastRay(Ray& ray)
 		Eigen::Vector3f normal = (ray.Payload.WorldPosition - m_Scene->Spheres()[closestSphereIndex].Center).normalized();
 		ray.Payload.WorldNormal = normal;
 	}
+}
+
+Color Renderer::EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld)
+{
+	std::vector<int> emitters;
+	for (int id = 0; id < m_Scene->Spheres().size(); id++)
+	{
+		if (m_Scene->GetMaterial(m_Scene->Spheres()[id].MaterialID).EmitsLight)
+			emitters.push_back(id);
+	}
+	
+	int randomEmitterID = emitters[Random::UInt(0, emitters.size() - 1)];
+	Sphere emitter = m_Scene->Spheres()[randomEmitterID];
+
+	Eigen::Vector3f pointOnSurface = emitter.SamplePointOnSurface();
+	Eigen::Vector3f worldIncidentDirection = (pointOnSurface - ray.Payload.WorldPosition).normalized();
+	worldIncidentDirection = (emitter.Center - ray.Payload.WorldPosition).normalized();
+
+	Ray shadowRay;
+	shadowRay.Origin = ray.Payload.WorldPosition + 0.001f * ray.Payload.WorldNormal;
+	shadowRay.Direction = worldIncidentDirection;
+	CastRay(shadowRay);
+
+	if (shadowRay.Payload.ObjectID == randomEmitterID)
+	{
+		float P = (-worldIncidentDirection).dot(shadowRay.Payload.WorldNormal) / (pointOnSurface - ray.Payload.WorldPosition).dot(pointOnSurface - ray.Payload.WorldPosition);
+		return BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection) * material.LightColor * material.LightIntensity;
+		//return BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection) * material.LightColor * material.LightIntensity * P * (float)emitters.size();
+	}
+	else
+		return Color::Black();
 }
