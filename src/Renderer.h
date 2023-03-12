@@ -4,7 +4,6 @@
 #include "Ray.h"
 #include "Image.h"
 #include "Scene.h"
-#include "Color.h"
 #include "Material.h"
 
 #include <stdint.h>
@@ -14,7 +13,7 @@ struct RenderSettings
 	bool Accumulate;
 	bool AccumulateForever;
 	int MaxAccumulatedSamples;
-	Color BackgroundColor;
+	Eigen::Vector3f BackgroundColor;
 };
 
 class Renderer
@@ -27,9 +26,9 @@ public:
 
 private:
 
-	Color PerPixel(int x, int y, const RenderSettings& renderSettings);
+	Eigen::Vector3f PerPixel(int x, int y, const RenderSettings& renderSettings);
 	void CastRay(Ray& ray);
-	Color EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld);
+	Eigen::Vector3f EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld);
 
 private:
 	int m_ViewportWidth = 0;

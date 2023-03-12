@@ -65,12 +65,12 @@ bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& t
 	{
 		for (int x = 0; x < m_ViewportWidth; x++)
 		{
-			Color pixelColor = PerPixel(x, y, renderSettings);
-			m_AccumulatedData[x + y * m_ViewportWidth] += pixelColor.ToVec3();
+			Eigen::Vector3f pixelColor = PerPixel(x, y, renderSettings);
+			m_AccumulatedData[x + y * m_ViewportWidth] += pixelColor;
 
-			Color accumulatedPixelColor(m_AccumulatedData[x + y * m_ViewportWidth] * (1.0f / m_FrameIndex));
-			accumulatedPixelColor.Clamp();
-			m_ImageData[x + y * m_ViewportWidth] = accumulatedPixelColor.RGBA();
+			Eigen::Vector3f accumulatedPixelColor(m_AccumulatedData[x + y * m_ViewportWidth] * (1.0f / m_FrameIndex));
+			Eigen::Vector3f clamped = Utils::ClampV(accumulatedPixelColor, 0.0f, 1.0f);
+			m_ImageData[x + y * m_ViewportWidth] = Utils::Color::FloatToRGBA(clamped);
 		}
 	});
 
@@ -102,17 +102,16 @@ bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& t
 	return true;
 }
 
-Color Renderer::PerPixel(int x, int y, const RenderSettings& renderSettings)
+Eigen::Vector3f Renderer::PerPixel(int x, int y, const RenderSettings& renderSettings)
 {
 	Ray ray;
 	ray.Origin = m_Camera->GetPosition();
 	ray.Direction = m_Camera->GetRayDirections()[x + y * m_Camera->GetViewportWidth()];
 
-	Color pixelColor = Color::Black();
-	Color throughput = Color::White();
+	Eigen::Vector3f pixelColor = Utils::Color::Black();
+	Eigen::Vector3f throughput = Utils::Color::White();
 
-
-	int maxBounces = 1;
+	int maxBounces = 40;
 	for (int bounce = 0; bounce < maxBounces; bounce++)
 	{
 		CastRay(ray);
@@ -120,7 +119,7 @@ Color Renderer::PerPixel(int x, int y, const RenderSettings& renderSettings)
 		// Ray missed - add background color and break.
 		if (!ray.Payload.RayHitSomething)
 		{
-			pixelColor += throughput * renderSettings.BackgroundColor;
+			pixelColor += throughput.cwiseProduct(renderSettings.BackgroundColor);
 			break;
 		}
 
@@ -134,16 +133,17 @@ Color Renderer::PerPixel(int x, int y, const RenderSettings& renderSettings)
 		//if (material.EmitsLight)
 		//	pixelColor += throughput * material.LightColor * material.LightIntensity;
 
-		pixelColor += throughput * EvaluateDirectLight(ray, material, worldToLocal, localToWorld);
+		Eigen::Vector3f direct = EvaluateDirectLight(ray, material, worldToLocal, localToWorld);
+		pixelColor += throughput.cwiseProduct(direct);
 
 		// Sample an incident direction (in local space).
 		Eigen::Vector3f incidentDirection;
-		Color multiplier = BSDF::Lambertian::Sample(&incidentDirection, material.Albedo);
-		throughput *= BSDF::Lambertian::Eval(material.Albedo, incidentDirection) * (1.0f / BSDF::Lambertian::Pdf(incidentDirection));
+		Eigen::Vector3f multiplier = BSDF::Lambertian::Sample(material.Albedo, &incidentDirection);
+		throughput = throughput.cwiseProduct(BSDF::Lambertian::Eval(material.Albedo, incidentDirection)) * (1.0f / BSDF::Lambertian::Pdf(incidentDirection));
 		//throughput *= multiplier;
 
 		// Russian roulette
-		float p = std::max(throughput.R, std::max(throughput.G, throughput.B));
+		float p = std::max(throughput.x(), std::max(throughput.y(), throughput.z()));
 		if (Random::Float() > p)
 			break;
 
@@ -191,7 +191,7 @@ void Renderer::CastRay(Ray& ray)
 	}
 }
 
-Color Renderer::EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld)
+Eigen::Vector3f Renderer::EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld)
 {
 	std::vector<int> emitters;
 	for (int id = 0; id < m_Scene->Spheres().size(); id++)
@@ -201,7 +201,8 @@ Color Renderer::EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f
 	}
 	
 	int randomEmitterID = emitters[Random::UInt(0, emitters.size() - 1)];
-	Sphere emitter = m_Scene->Spheres()[randomEmitterID];
+	Sphere emitter = m_Scene->GetSphere(randomEmitterID);
+	Material emitterMaterial = m_Scene->GetMaterial(emitter.MaterialID);
 
 	Eigen::Vector3f pointOnSurface = emitter.SamplePointOnSurface();
 	Eigen::Vector3f worldIncidentDirection = (pointOnSurface - ray.Payload.WorldPosition).normalized();
@@ -215,9 +216,16 @@ Color Renderer::EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f
 	if (shadowRay.Payload.ObjectID == randomEmitterID)
 	{
 		float P = (-worldIncidentDirection).dot(shadowRay.Payload.WorldNormal) / (pointOnSurface - ray.Payload.WorldPosition).dot(pointOnSurface - ray.Payload.WorldPosition);
-		return BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection) * material.LightColor * material.LightIntensity;
-		//return BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection) * material.LightColor * material.LightIntensity * P * (float)emitters.size();
+		//return BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection).cwiseProduct(material.LightColor) * material.LightIntensity;
+		Eigen::Vector3f direct = BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection).cwiseProduct(emitterMaterial.LightColor) * emitterMaterial.LightIntensity * P * (float)emitters.size();
+
+		/*if (direct.x() > 1.0f || direct.y() > 1.0f || direct.z() > 1.0f)
+		{
+			PULSE_TRACE("direct=({}, {}, {})     P={}     LightColor=({}, {}, {})    Intensity={}", direct.x(), direct.y(), direct.z(), P, material.LightColor.x(), material.LightColor.y(), material.LightColor.z(), material.LightIntensity)
+		}*/
+
+		return direct;
 	}
 	else
-		return Color::Black();
+		return Utils::Color::Black();
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include "Eigen/Dense"
-#include "Color.h"
 #include "Random.h"
 
 struct Sphere

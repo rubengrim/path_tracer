@@ -6,7 +6,7 @@
 
 namespace BSDF::Lambertian {
 
-	Color Eval(Color albedo, Eigen::Vector3f incidentDirection)
+	Eigen::Vector3f Eval(Eigen::Vector3f albedo, Eigen::Vector3f incidentDirection)
 	{
 		return albedo * INV_PI * incidentDirection.z();
 	}
@@ -17,7 +17,7 @@ namespace BSDF::Lambertian {
 		return incidentDirection.z() * INV_PI;
 	}
 
-	Color Sample(Eigen::Vector3f* incidentDirection, Color albedo)
+	Eigen::Vector3f Sample(Eigen::Vector3f albedo, Eigen::Vector3f* incidentDirection)
 	{
 		float u1 = Random::Float();
 		float u2 = Random::Float();

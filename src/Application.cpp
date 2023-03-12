@@ -2,7 +2,6 @@
 
 #include "Mouse.h"
 #include "Keyboard.h"
-#include "Color.h"
 #include "Random.h"
 
 #include "glad/gl.h"
@@ -115,10 +114,10 @@ void Application::Run()
 	// Set up scene
 	Scene activeScene;
 
-	Material lightGrey("Light grey", Color::LightGrey());
-	Material red("Red", Color::Red());
-	Material green("Green", Color::Green());
-	Material emissive("White emissive", Color::White(), true, 100.0f, Color::White());
+	Material lightGrey("Light grey", Utils::Color::LightGrey());
+	Material red("Red", Utils::Color::Red());
+	Material green("Green", Utils::Color::Green());
+	Material emissive("White emissive", Utils::Color::White(), true, 100.0f, Utils::Color::White());
 	activeScene.AddMaterials({lightGrey, red, green, emissive});
 
 	Sphere ground(Eigen::Vector3f(0.0f, -50.5f, -4.0f), 50.0f, 0);
@@ -134,7 +133,7 @@ void Application::Run()
 	renderSettings.Accumulate = true;
 	renderSettings.MaxAccumulatedSamples = 100;
 	renderSettings.AccumulateForever = true;
-	renderSettings.BackgroundColor = Color::DarkGrey();
+	renderSettings.BackgroundColor = Utils::Color::DarkGrey();
 	bool shouldResetAccumulation = false;
 
 	auto beginFrame = std::chrono::high_resolution_clock::now();
@@ -233,9 +232,7 @@ void Application::Run()
 			ImGui::NewLine();
 			
 			// Background color
-			Eigen::Vector3f backgroundColor = renderSettings.BackgroundColor.ToVec3();
-			shouldResetAccumulation |= ImGui::ColorEdit3("Background color", backgroundColor.data());
-			renderSettings.BackgroundColor = Color(backgroundColor);
+			shouldResetAccumulation |= ImGui::ColorEdit3("Background color", renderSettings.BackgroundColor.data());
 			
 			ImGui::PopItemWidth();
 			ImGui::End();
@@ -256,14 +253,10 @@ void Application::Run()
 
 				Material& material = activeScene.Materials()[i];
 				ImGui::InputText("Name", &material.Name);
-				Eigen::Vector3f albedo = material.Albedo.ToVec3();
-				shouldResetAccumulation |= ImGui::ColorEdit3("Albedo", albedo.data());
-				material.Albedo = Color(albedo);
+				shouldResetAccumulation |= ImGui::ColorEdit3("Albedo", material.Albedo.data());
 				shouldResetAccumulation |= ImGui::Checkbox("Emits light", &material.EmitsLight);
-				shouldResetAccumulation |= ImGui::DragFloat("Light intensity", &material.LightIntensity);
-				Eigen::Vector3f lightColor = material.LightColor.ToVec3();
-				shouldResetAccumulation |= ImGui::ColorEdit3("Light color", lightColor.data());
-				material.LightColor = Color(lightColor);
+				shouldResetAccumulation |= ImGui::DragFloat("Light intensity", &material.LightIntensity, 0.1f, 0.0f);
+				shouldResetAccumulation |= ImGui::ColorEdit3("Light color", material.LightColor.data());
 
 				if (ImGui::Button("Delete"))
 				{
@@ -287,7 +280,7 @@ void Application::Run()
 
 			if (ImGui::Button("Add Material"))
 			{
-				Material newMaterial("New material", Color::LightGrey());
+				Material newMaterial("New material", Utils::Color::LightGrey());
 				activeScene.AddMaterial(newMaterial);
 				shouldResetAccumulation = true;
 			}

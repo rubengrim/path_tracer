@@ -1,7 +1,7 @@
 #pragma once
-#include "Color.h"
 #include "BSDF.h"
 #include "Scene.h"
+#include "Utils.h"
 
 #include <string>
 
@@ -9,12 +9,12 @@ struct Material
 {
 	Material() = default;
 	
-	Material(std::string name, Color albedo)
-		: Name(name), Albedo(albedo), EmitsLight(false), LightIntensity(1.0f), LightColor(Color::White())
+	Material(std::string name, Eigen::Vector3f albedo)
+		: Name(name), Albedo(albedo), EmitsLight(false), LightIntensity(1.0f), LightColor(Utils::Color::White())
 	{
 	}
 
-	Material(std::string name, Color albedo, bool emitsLight, float lightIntensity, Color lightColor)
+	Material(std::string name, Eigen::Vector3f albedo, bool emitsLight, float lightIntensity, Eigen::Vector3f lightColor)
 		: Name(name), Albedo(albedo), EmitsLight(emitsLight), LightIntensity(lightIntensity), LightColor(lightColor)
 	{
 	}
@@ -36,8 +36,8 @@ struct Material
 	//}
 
 	std::string Name;
-	Color Albedo;
+	Eigen::Vector3f Albedo;
 	bool EmitsLight;
 	float LightIntensity;
-	Color LightColor;
+	Eigen::Vector3f LightColor;
 };
