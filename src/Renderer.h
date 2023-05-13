@@ -28,7 +28,7 @@ private:
 
 	Eigen::Vector3f PerPixel(int x, int y, const RenderSettings& renderSettings);
 	void CastRay(Ray& ray);
-	Eigen::Vector3f EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld);
+	Eigen::Vector3f EvaluateDirectLight(RayPayload refPayload, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld);
 
 private:
 	int m_ViewportWidth = 0;

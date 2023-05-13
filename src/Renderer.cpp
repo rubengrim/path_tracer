@@ -54,8 +54,9 @@ bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& t
 	if (m_FrameIndex == 1)
 		memset(m_AccumulatedData, 0, m_ViewportWidth * m_ViewportHeight * sizeof(Eigen::Vector3f));
 
-#define MULTI_THREADING 1
-#if MULTI_THREADING
+// Parallell for_each() loops are MSVS-only, so allow multithreading on Windows only.
+#define MULTI_THREADING
+#if defined _PLATFORM_WINDOWS && defined MULTI_THREADING
 
 	std::vector<int> yValues;
 	for (int y = 0; y < m_ViewportHeight; y++)
@@ -80,17 +81,15 @@ bool Renderer::Render(Image& image, Scene& scene, const Camera& camera, float& t
 	{
 		for (int x = 0; x < m_ViewportWidth; x++)
 		{
-			//Color pixelColor = PerPixel(x, y);
-			//pixelColor.Clamp();
-			//m_AccumulatedData[x + y * m_ViewportWidth] += pixelColor.ToVec3();
-
-			//Color accumulatedPixelColor(m_AccumulatedData[x + y * m_ViewportWidth] * (1.0f / m_FrameIndex));
-			//m_ImageData[x + y * m_ViewportWidth] = accumulatedPixelColor.RGBA();
+      Eigen::Vector3f pixelColor = PerPixel(x, y, renderSettings);
+      m_AccumulatedData[x + y * m_ViewportWidth] += pixelColor;
+      Eigen::Vector3f accumulatedPixelColor(m_AccumulatedData[x + y * m_ViewportWidth] * (1.0f / m_FrameIndex));
+      Eigen::Vector3f clamped = Utils::ClampV(accumulatedPixelColor, 0.0f, 1.0f);
+      m_ImageData[x + y * m_ViewportWidth] = Utils::Color::FloatToRGBA(clamped);
 		}
 	}
 
 #endif
-
 
 	m_FrameIndex++;
 
@@ -130,17 +129,19 @@ Eigen::Vector3f Renderer::PerPixel(int x, int y, const RenderSettings& renderSet
 		Sphere& sphere = m_Scene->Spheres()[ray.Payload.ObjectID];
 		Material& material = m_Scene->Materials()[sphere.MaterialID];
 
-		//if (material.EmitsLight)
-		//	pixelColor += throughput * material.LightColor * material.LightIntensity;
+    if (bounce == 0 && material.EmitsLight)
+    {
+      pixelColor += throughput.cwiseProduct(material.LightColor * material.LightIntensity);
+    }
 
-		Eigen::Vector3f direct = EvaluateDirectLight(ray, material, worldToLocal, localToWorld);
+		Eigen::Vector3f direct = EvaluateDirectLight(ray.Payload, material, worldToLocal, localToWorld);
 		pixelColor += throughput.cwiseProduct(direct);
 
 		// Sample an incident direction (in local space).
 		Eigen::Vector3f incidentDirection;
-		Eigen::Vector3f multiplier = BSDF::Lambertian::Sample(material.Albedo, &incidentDirection);
-		throughput = throughput.cwiseProduct(BSDF::Lambertian::Eval(material.Albedo, incidentDirection)) * (1.0f / BSDF::Lambertian::Pdf(incidentDirection));
-		//throughput *= multiplier;
+		Eigen::Vector3f weight = BSDF::Lambertian::Sample(material.Albedo, &incidentDirection);
+    throughput = throughput.cwiseProduct(weight);
+		//throughput = throughput.cwiseProduct(BSDF::Lambertian::Eval(material.Albedo, incidentDirection)) * (1.0f / BSDF::Lambertian::Pdf(incidentDirection));
 
 		// Russian roulette
 		float p = std::max(throughput.x(), std::max(throughput.y(), throughput.z()));
@@ -191,41 +192,62 @@ void Renderer::CastRay(Ray& ray)
 	}
 }
 
-Eigen::Vector3f Renderer::EvaluateDirectLight(Ray ray, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld)
+Eigen::Vector3f Renderer::EvaluateDirectLight(RayPayload refPayload, Material& material, Eigen::Matrix3f worldToLocal, Eigen::Matrix3f localToWorld)
 {
 	std::vector<int> emitters;
 	for (int id = 0; id < m_Scene->Spheres().size(); id++)
 	{
-		if (m_Scene->GetMaterial(m_Scene->Spheres()[id].MaterialID).EmitsLight)
+		if (m_Scene->GetMaterial(m_Scene->GetSphere(id).MaterialID).EmitsLight)
+    {
 			emitters.push_back(id);
+    }
 	}
-	
-	int randomEmitterID = emitters[Random::UInt(0, emitters.size() - 1)];
-	Sphere emitter = m_Scene->GetSphere(randomEmitterID);
-	Material emitterMaterial = m_Scene->GetMaterial(emitter.MaterialID);
 
-	Eigen::Vector3f pointOnSurface = emitter.SamplePointOnSurface();
-	Eigen::Vector3f worldIncidentDirection = (pointOnSurface - ray.Payload.WorldPosition).normalized();
-	worldIncidentDirection = (emitter.Center - ray.Payload.WorldPosition).normalized();
+  if (emitters.size() == 0)
+  {
+    return Utils::Color::Black();
+  }
+
+	int chosenEmitterID = emitters[Random::UInt(0, emitters.size() - 1)];
+	Sphere chosenEmitter = m_Scene->GetSphere(chosenEmitterID);
+	Material chosenEmitterMaterial = m_Scene->GetMaterial(chosenEmitter.MaterialID);
+
+  if (refPayload.ObjectID == chosenEmitterID)
+  {
+    return Utils::Color::Black();
+  }
+
+	Eigen::Vector3f pointOnSurface; 
+  float lightPdf = chosenEmitter.SamplePointOnSurface(refPayload.WorldPosition, &pointOnSurface);
+  if (lightPdf == 0.0f)
+  {
+    return Utils::Color::Black();
+  }
+
+	Eigen::Vector3f worldIncidentDirection = (pointOnSurface - refPayload.WorldPosition).normalized();
+  
+  if (worldIncidentDirection.dot(refPayload.WorldNormal) <= 0.0f)
+  {
+    return Utils::Color::Black();
+  }
 
 	Ray shadowRay;
-	shadowRay.Origin = ray.Payload.WorldPosition + 0.001f * ray.Payload.WorldNormal;
+	shadowRay.Origin = refPayload.WorldPosition + 0.0001f * refPayload.WorldNormal;
 	shadowRay.Direction = worldIncidentDirection;
 	CastRay(shadowRay);
 
-	if (shadowRay.Payload.ObjectID == randomEmitterID)
+	if (shadowRay.Payload.ObjectID == chosenEmitterID)
 	{
-		float P = (-worldIncidentDirection).dot(shadowRay.Payload.WorldNormal) / (pointOnSurface - ray.Payload.WorldPosition).dot(pointOnSurface - ray.Payload.WorldPosition);
-		//return BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection).cwiseProduct(material.LightColor) * material.LightIntensity;
-		Eigen::Vector3f direct = BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection).cwiseProduct(emitterMaterial.LightColor) * emitterMaterial.LightIntensity * P * (float)emitters.size();
+//		float P = (-worldIncidentDirection).dot(shadowRay.Payload.WorldNormal) / (chosenEmitter.Center - refPayload.WorldPosition).dot(chosenEmitter.Center - refPayload.WorldPosition);
+//		Eigen::Vector3f direct = BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection).cwiseProduct(chosenEmitterMaterial.LightColor) * chosenEmitterMaterial.LightIntensity * P * (float)emitters.size();
+    Eigen::Vector3f received = chosenEmitterMaterial.LightColor * chosenEmitterMaterial.LightIntensity;
+    Eigen::Vector3f direct = BSDF::Lambertian::Eval(material.Albedo, worldToLocal * worldIncidentDirection).cwiseProduct(received) / lightPdf * (float)emitters.size(); 
 
-		/*if (direct.x() > 1.0f || direct.y() > 1.0f || direct.z() > 1.0f)
-		{
-			PULSE_TRACE("direct=({}, {}, {})     P={}     LightColor=({}, {}, {})    Intensity={}", direct.x(), direct.y(), direct.z(), P, material.LightColor.x(), material.LightColor.y(), material.LightColor.z(), material.LightIntensity)
-		}*/
-
+    direct = Utils::ClampVMin(direct, 0.0f);
 		return direct;
 	}
 	else
+  {
 		return Utils::Color::Black();
+  }
 }

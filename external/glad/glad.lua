@@ -1,6 +1,5 @@
 project "glad"
 	kind "StaticLib"
-	architecture "x86_64"
 	language "C"
 
 	configurations
@@ -21,7 +20,11 @@ project "glad"
 	}
 
 	filter ("system:windows")
+    architecture "x86_64"
 		systemversion "latest"
+
+  filter ("system:macosx")
+    architecture "ARM"
 
 	filter ("configurations:Debug")
 		runtime "Debug"

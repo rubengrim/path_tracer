@@ -48,7 +48,6 @@ namespace Utils {
 	float Clampf(float f, float min, float max);
 
 	Eigen::Matrix3f CreateOrthogonalBasis(Eigen::Vector3f n);
-
 }
 
 namespace Utils::Color {

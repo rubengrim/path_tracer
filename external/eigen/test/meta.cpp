@@ -29,47 +29,28 @@ struct MyImpl : public MyInterface {
 
 EIGEN_DECLARE_TEST(meta)
 {
-  VERIFY((internal::conditional<(3<4),internal::true_type, internal::false_type>::type::value));
   VERIFY(( internal::is_same<float,float>::value));
   VERIFY((!internal::is_same<float,double>::value));
   VERIFY((!internal::is_same<float,float&>::value));
   VERIFY((!internal::is_same<float,const float&>::value));
 
-  VERIFY(( internal::is_same<float,internal::remove_all<const float&>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_all<const float*>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_all<const float*&>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_all<float**>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_all<float**&>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_all<float* const *&>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_all<float* const>::type >::value));
-
-  // test add_const
-  VERIFY(( internal::is_same< internal::add_const<float>::type, const float >::value));
-  VERIFY(( internal::is_same< internal::add_const<float*>::type, float* const>::value));
-  VERIFY(( internal::is_same< internal::add_const<float const*>::type, float const* const>::value));
-  VERIFY(( internal::is_same< internal::add_const<float&>::type, float& >::value));
-
-  // test remove_const
-  VERIFY(( internal::is_same< internal::remove_const<float const* const>::type, float const* >::value));
-  VERIFY(( internal::is_same< internal::remove_const<float const*>::type, float const* >::value));
-  VERIFY(( internal::is_same< internal::remove_const<float* const>::type, float* >::value));
+  VERIFY(( internal::is_same<float,internal::remove_all_t<const float&> >::value));
+  VERIFY(( internal::is_same<float,internal::remove_all_t<const float*> >::value));
+  VERIFY(( internal::is_same<float,internal::remove_all_t<const float*&> >::value));
+  VERIFY(( internal::is_same<float,internal::remove_all_t<float**> >::value));
+  VERIFY(( internal::is_same<float,internal::remove_all_t<float**&> >::value));
+  VERIFY(( internal::is_same<float,internal::remove_all_t<float* const *&> >::value));
+  VERIFY(( internal::is_same<float,internal::remove_all_t<float* const> >::value));
 
   // test add_const_on_value_type
-  VERIFY(( internal::is_same< internal::add_const_on_value_type<float&>::type, float const& >::value));
-  VERIFY(( internal::is_same< internal::add_const_on_value_type<float*>::type, float const* >::value));
+  VERIFY(( internal::is_same< internal::add_const_on_value_type_t<float&>, float const& >::value));
+  VERIFY(( internal::is_same< internal::add_const_on_value_type_t<float*>, float const* >::value));
 
-  VERIFY(( internal::is_same< internal::add_const_on_value_type<float>::type, const float >::value));
-  VERIFY(( internal::is_same< internal::add_const_on_value_type<const float>::type, const float >::value));
+  VERIFY(( internal::is_same< internal::add_const_on_value_type_t<float>, const float >::value));
+  VERIFY(( internal::is_same< internal::add_const_on_value_type_t<const float>, const float >::value));
 
-  VERIFY(( internal::is_same< internal::add_const_on_value_type<const float* const>::type, const float* const>::value));
-  VERIFY(( internal::is_same< internal::add_const_on_value_type<float* const>::type, const float* const>::value));
-
-  VERIFY(( internal::is_same<float,internal::remove_reference<float&>::type >::value));
-  VERIFY(( internal::is_same<const float,internal::remove_reference<const float&>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_pointer<float*>::type >::value));
-  VERIFY(( internal::is_same<const float,internal::remove_pointer<const float*>::type >::value));
-  VERIFY(( internal::is_same<float,internal::remove_pointer<float* const >::type >::value));
-
+  VERIFY(( internal::is_same< internal::add_const_on_value_type_t<const float* const>, const float* const>::value));
+  VERIFY(( internal::is_same< internal::add_const_on_value_type_t<float* const>, const float* const>::value));
 
   // is_convertible
   STATIC_CHECK(( internal::is_convertible<float,double>::value ));
@@ -105,22 +86,16 @@ EIGEN_DECLARE_TEST(meta)
     VERIFY(( check_is_convertible(A*B, A) ));
   }
 
-  #if (EIGEN_COMP_GNUC  && EIGEN_COMP_GNUC  <=  99) \
-   || (EIGEN_COMP_CLANG && EIGEN_COMP_CLANG <= 909) \
-   || (EIGEN_COMP_MSVC  && EIGEN_COMP_MSVC  <=1914)
+  #if (EIGEN_COMP_GNUC_STRICT  && EIGEN_COMP_GNUC  <=  990) \
+   || (EIGEN_COMP_CLANG_STRICT && EIGEN_COMP_CLANG <=  990) \
+   || (EIGEN_COMP_MSVC         && EIGEN_COMP_MSVC  <= 1914)
   // See http://eigen.tuxfamily.org/bz/show_bug.cgi?id=1752,
   // basically, a fix in the c++ standard breaks our c++98 implementation
   // of is_convertible for abstract classes.
   // So the following tests are expected to fail with recent compilers.
 
   STATIC_CHECK(( !internal::is_convertible<MyInterface, MyImpl>::value ));
-  #if (!EIGEN_COMP_GNUC_STRICT) || (EIGEN_GNUC_AT_LEAST(4,8))
-  // GCC prior to 4.8 fails to compile this test:
-  // error: cannot allocate an object of abstract type 'MyInterface'
-  // In other word, it does not obey SFINAE.
-  // Nevertheless, we don't really care about supporting abstract type as scalar type!
   STATIC_CHECK(( !internal::is_convertible<MyImpl, MyInterface>::value ));
-  #endif
   STATIC_CHECK((  internal::is_convertible<MyImpl, const MyInterface&>::value ));
 
   #endif

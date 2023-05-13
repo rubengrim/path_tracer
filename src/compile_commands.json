@@ -1,0 +1,229 @@
+[
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/backends/imgui_impl_glfw.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_impl_glfw.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_impl_glfw.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/backends/imgui_impl_glfw.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/backends/imgui_impl_opengl3.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_impl_opengl3.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_impl_opengl3.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/backends/imgui_impl_opengl3.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_demo.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_demo.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_demo.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_demo.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_draw.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_draw.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_draw.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_draw.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_tables.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_tables.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_tables.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_tables.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_widgets.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_widgets.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_widgets.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/imgui/imgui_widgets.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp/imgui_stdlib.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_stdlib.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/imgui_stdlib.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp/imgui_stdlib.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Application.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Application.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Application.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Application.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/BSDF.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/BSDF.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/BSDF.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/BSDF.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Camera.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Camera.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Camera.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Camera.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Color.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Color.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Color.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Color.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Image.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Image.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Image.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Image.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Intersections.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Intersections.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Intersections.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Intersections.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Keyboard.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Keyboard.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Keyboard.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Keyboard.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Logger.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Logger.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Logger.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Logger.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Main.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Main.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Main.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Main.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Mouse.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Mouse.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Mouse.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Mouse.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Random.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Random.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Random.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Random.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Renderer.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Renderer.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Renderer.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Renderer.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Utils.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Utils.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Utils.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Utils.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/src/Window.cpp",
+            "command": "cc -MD -MP -DPULSE_RELEASE -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui -I/Users/ruben/dev/Pulse-Path-Tracer/external/imgui/misc/cpp -I/Users/ruben/dev/Pulse-Path-Tracer/external/spdlog/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -I/Users/ruben/dev/Pulse-Path-Tracer/external/eigen/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Window.o -MF /Users/ruben/dev/Pulse-Path-Tracer/obj/Release-ARM64/Window.d -c /Users/ruben/dev/Pulse-Path-Tracer/src/Window.cpp"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_init.m",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_init.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_init.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_init.m"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_joystick.m",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_joystick.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_joystick.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_joystick.m"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_monitor.m",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_monitor.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_monitor.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_monitor.m"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_time.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_time.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_time.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_time.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_window.m",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_window.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/cocoa_window.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/cocoa_window.m"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/context.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/context.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/context.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/context.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/egl_context.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/egl_context.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/egl_context.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/egl_context.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/init.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/init.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/init.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/init.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/input.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/input.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/input.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/input.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/monitor.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/monitor.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/monitor.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/monitor.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/nsgl_context.m",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/nsgl_context.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/nsgl_context.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/nsgl_context.m"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/osmesa_context.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/osmesa_context.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/osmesa_context.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/osmesa_context.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/posix_thread.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/posix_thread.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/posix_thread.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/posix_thread.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/vulkan.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/vulkan.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/vulkan.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/vulkan.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/window.c",
+            "command": "cc -MD -MP -D_GLFW_COCOA -I/Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/include/GLFW -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/window.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/obj/Release/window.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/GLFW/src/window.c"
+          }
+,
+          {
+            "directory": "/Users/ruben/dev/Pulse-Path-Tracer/external/glad",
+            "file": "/Users/ruben/dev/Pulse-Path-Tracer/external/glad/src/gl.c",
+            "command": "cc -MD -MP -I/Users/ruben/dev/Pulse-Path-Tracer/external/glad/include -O2 -o /Users/ruben/dev/Pulse-Path-Tracer/external/glad/obj/Release/gl.o -MF /Users/ruben/dev/Pulse-Path-Tracer/external/glad/obj/Release/gl.d -c /Users/ruben/dev/Pulse-Path-Tracer/external/glad/src/gl.c"
+          }
+]

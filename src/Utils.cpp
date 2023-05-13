@@ -1,5 +1,9 @@
 #include "Utils.h"
 #include "Random.h"
+#include "Logger.h"
+
+#include <stdio.h>
+#include <iostream>
 
 //template<typename T>
 //T Utils::ClampVMin(T vec, float min)

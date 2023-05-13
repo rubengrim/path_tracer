@@ -1,8 +1,9 @@
 #pragma once
-#include <random>
-#include <stdint.h>
 
 #include "Eigen/Dense"
+
+#include <random>
+#include <stdint.h>
 
 class Random
 {

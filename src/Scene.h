@@ -1,7 +1,9 @@
 #pragma once
-#include <vector>
+
 #include "Objects.h"
 #include "Material.h"
+
+#include <vector>
 
 class Scene
 {

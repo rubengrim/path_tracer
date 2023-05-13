@@ -26,7 +26,7 @@ bool Image::UploadDataToTexture(uint32_t* imageData)
 {
 	if (imageData == nullptr)
 	{
-		PULSE_WARN("Attempting to upload invalid image data to texture.")
+		LOG_WARN("Attempting to upload invalid image data to texture.")
 		return false;
 	}
 

@@ -18,7 +18,7 @@ void Camera::Update(float timeStep)
 	m_ForwardDirection = (m_InverseViewMatrix * Eigen::Vector4f(0.0f, 0.0f, -1.0f, 0.0f)).head(3).normalized();
 	m_RightDirection = Eigen::Vector3f::UnitY().cross(m_ForwardDirection).normalized();
 
-	if (Mouse::ButtonPressed(MouseButton::Right))
+	if (Keyboard::KeyPressed(Key::Space))
 	{
 		Mouse::HideCursor();
 		

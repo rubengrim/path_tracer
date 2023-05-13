@@ -1,10 +1,11 @@
+require "external.Premake.export-compile-commands.export-compile-commands"
+
 workspace "Pulse"
-	architecture "x86_64"
 
 	configurations
 	{
 		"Debug",
-		"Release"	
+		"Release"
 	}
 
 project "Pulse"
@@ -14,6 +15,17 @@ project "Pulse"
 
 	targetdir ("bin/%{cfg.buildcfg}-%{cfg.architecture}")
 	objdir ("obj/%{cfg.buildcfg}-%{cfg.architecture}")
+
+--  buildoptions 
+--  {
+--    "-fsanitize=address",
+--    "-fno-omit-frame-pointer",
+--  }
+--
+--  linkoptions
+--  {
+--    "-fsanitize=address",
+--  }
 
 	files 
 	{
@@ -46,26 +58,47 @@ project "Pulse"
 		"glad"
 	}
 
+  filter "system:windows"
+    architecture "x86_64"
+    systemversion "latest"
+
+    defines
+    {
+      "_PLATFORM_WINDOWS"
+    }
+
+  filter "system:macosx"
+    architecture "ARM64"
+
+    defines
+    {
+      "_PLATFORM_MACOSX"
+    }
+
+    links
+    {
+      "Cocoa.framework",
+      "IOKit.framework"
+    }
+
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
-		
+
 		defines
 		{
-			"PULSE_DEBUG"
+			"_CONFIG_DEBUG"
 		}
 
 	filter "configurations:Release"
 		runtime "Release"
 		optimize "on"
-		
+
 		defines
 		{
-			"PULSE_RELEASE"
+			"_CONFIG_RELEASE"
 		}
 
-    filter "system:windows"
-        systemversion "latest"
 
 include "external/GLFW/glfw.lua"
 include "external/glad/glad.lua"

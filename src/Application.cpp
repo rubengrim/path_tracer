@@ -10,7 +10,6 @@
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui_stdlib.h"
-
 #include "Eigen/Core"
 
 #include <iostream>
@@ -26,7 +25,7 @@ Application::~Application()
 
 void ErrorCallback(int error, const char* description)
 {
-	PULSE_ERROR("GLFW error: {}", description)
+	LOG_ERROR("GLFW error: {}", description)
 }
 
 bool Application::Initialize()
@@ -40,20 +39,27 @@ bool Application::Initialize()
 
 	if (!glfwInit())
 	{
-		PULSE_ERROR("Error during initialization of GLFW.")
+    Logger::Error("Error during initialization of GLFW.");
 		succeeded = false;
 	}
 
 	// BEGIN: Initialize GLFW
 	glfwSetErrorCallback(ErrorCallback);
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  // Need to use 3.2 with forward compatability and core profile to run correctly on macos.
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	m_WindowHandle = glfwCreateWindow(800, 600, "My Title", NULL, NULL);
+  // This works on windows only.
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+	m_WindowHandle = glfwCreateWindow(800, 600, "Path tracer", NULL, NULL);
 	if (m_WindowHandle == nullptr)
 	{
-		PULSE_ERROR("Error during GLFW window creation.")
+    Logger::Error("Error during GLFW window creation");
 		succeeded = false;
 	}
 
@@ -101,14 +107,15 @@ bool Application::Initialize()
 void Application::Run()
 {
 	m_IsRunning = true;
-	PULSE_TRACE("Pulse is initialized and running.");
+  Logger::Info("Application is initialized and running.");
 
 	m_ViewportWidth = 400;
 	m_ViewportHeight = 200;
+
 	float timeToRender = 0.0f;
 
 	m_Camera = new Camera(Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, -1.0f), m_ViewportWidth, m_ViewportHeight);
-	m_Image = new Image(m_ViewportWidth, m_ViewportHeight);
+	m_ViewportImage = new Image(m_ViewportWidth, m_ViewportHeight);
 	m_Renderer = new Renderer(m_ViewportWidth, m_ViewportHeight);
 
 	// Set up scene
@@ -117,13 +124,13 @@ void Application::Run()
 	Material lightGrey("Light grey", Utils::Color::LightGrey());
 	Material red("Red", Utils::Color::Red());
 	Material green("Green", Utils::Color::Green());
-	Material emissive("White emissive", Utils::Color::White(), true, 100.0f, Utils::Color::White());
+	Material emissive("White emissive", Utils::Color::White(), true, 20.0f, Utils::Color::White());
 	activeScene.AddMaterials({lightGrey, red, green, emissive});
 
-	Sphere ground(Eigen::Vector3f(0.0f, -50.5f, -4.0f), 50.0f, 0);
+	Sphere ground(Eigen::Vector3f(0.0f, -300.5f, -4.0f), 300.0f, 0);
 	Sphere sphere1(Eigen::Vector3f(0.0f, 0.0f, -4.0f), 0.5f, 1);
 	Sphere lightSource(Eigen::Vector3f(0.0f, 1.0f, -4.0f), 0.2f, 3);
-	activeScene.AddSpheres({sphere1, ground, lightSource});
+	activeScene.AddSpheres({ground, sphere1, lightSource});
 
 	CameraSettings cameraSettings;
 	cameraSettings.MouseSensitivity = 0.07f;
@@ -139,8 +146,8 @@ void Application::Run()
 	auto beginFrame = std::chrono::high_resolution_clock::now();
 	auto endFrame = std::chrono::high_resolution_clock::now();
 
-#define RUN 1
-#if RUN
+#define GO_INTO_LOOP 1
+#if GO_INTO_LOOP 
 
 	// Main loop
 	while (m_IsRunning)
@@ -161,7 +168,7 @@ void Application::Run()
 
 		if (m_Camera->HasMoved() || shouldResetAccumulation)
 			m_Renderer->ResetAccumulation();
-		m_Renderer->Render(*m_Image, activeScene, *m_Camera, timeToRender, renderSettings);
+		m_Renderer->Render(*m_ViewportImage, activeScene, *m_Camera, timeToRender, renderSettings);
 		shouldResetAccumulation = false;
 
 		// BEGIN: Render GUI
@@ -183,13 +190,13 @@ void Application::Run()
 			m_ViewportHeight = ImGui::GetContentRegionAvail().y;
 			if (prevViewportWidth != m_ViewportWidth || prevViewportHeight != m_ViewportHeight)
 			{
-				m_Image->Resize(m_ViewportWidth, m_ViewportHeight);
+				m_ViewportImage->Resize(m_ViewportWidth, m_ViewportHeight);
 				m_Camera->Resize(m_ViewportWidth, m_ViewportHeight);
 				m_Renderer->Resize(m_ViewportWidth, m_ViewportHeight);
 			}
 
-			if (m_Image)
-				ImGui::Image((void*)(intptr_t)(m_Image->GetTextureId()), ImVec2(m_Image->GetWidth(), m_Image->GetHeight()));
+			if (m_ViewportImage)
+				ImGui::Image((void*)(intptr_t)(m_ViewportImage->GetTextureId()), ImVec2(m_ViewportImage->GetWidth(), m_ViewportImage->GetHeight()));
 
 			ImGui::End();
 			ImGui::PopStyleVar();

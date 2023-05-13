@@ -24,7 +24,7 @@ private:
 
 	Logger m_Logger;
 	Camera* m_Camera = nullptr;
-	Image* m_Image = nullptr;
+	Image* m_ViewportImage = nullptr;
 	Renderer* m_Renderer = nullptr;
 
 	int m_ViewportWidth = 0;

@@ -8,7 +8,7 @@ namespace BSDF::Lambertian {
 
 	Eigen::Vector3f Eval(Eigen::Vector3f albedo, Eigen::Vector3f incidentDirection)
 	{
-		return albedo * INV_PI * incidentDirection.z();
+		return albedo * incidentDirection.z() * INV_PI;
 	}
 
 	float Pdf(Eigen::Vector3f incidentDirection)
