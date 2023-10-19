@@ -1,6 +1,7 @@
 require "external.Premake.export-compile-commands.export-compile-commands"
+-- require "export-compile-commands"
 
-workspace "Pulse"
+workspace "toy_path_tracer"
 
 	configurations
 	{
@@ -8,7 +9,7 @@ workspace "Pulse"
 		"Release"
 	}
 
-project "Pulse"
+project "toy_path_tracer"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
